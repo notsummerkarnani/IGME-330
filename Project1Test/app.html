@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project1</title>
+    <script type="module" src="src/main.js"></script>
+    <script src="src/loader.js" type="module"></script>
+    <link rel="stylesheet" href="css/default-styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Freckle+Face&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <my-nav data-page="app"></my-nav>
+
+    <div class="section control" id="search-field-area">
+        <div class="columns is-centered" id="name-field">
+            <div class="column control is-half">
+                <input class="input is-medium" type="text" placeholder="Meal Name (eg. pizza)" id="input-search-bar">
+            </div>
+            <div class="column is-4">
+                <button class="column button is-medium is-full" id="btn-search">Search!</button>
+            </div>
+        </div>
+
+        <div class="columns is-centered has-text-centered ">
+            <div class="column is-narrow select is-medium">
+                <label class="label is-centered" for="number-select">Number of results</label>
+                <select class="is-centered" id="number-select">
+                    <option disabled>Number of results</option>
+                    <option selected>1</option>
+                    <option>3</option>
+                    <option>5</option>
+                    <option>10</option>
+                    <option>20</option>
+                    <option>25</option>
+                </select>
+            </div>
+
+            <div class="column is-narrow select is-medium">
+                <label class="label is-centered">Filter by category</label>
+                <select class="is-centered" id="category-select">
+                    <option disabled>Filter by category</option>
+                    <option selected>All</option>
+                </select>
+            </div>
+
+            <div class="column is-narrow select is-medium">
+                <label class="label is-centered">Filter by country</label>
+                <select class="is-centered" id="country-select">
+                    <option disabled>Filter by country</option>
+                    <option selected>All</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="output"></div>
+
+    <my-footer></my-footer>
+</body>
+
+</html>

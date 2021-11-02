@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Counter Component 1</title>
+    <!-- Web Components Polyfill for older browsers -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/2.6.0/webcomponents-loader.min.js"></script>
+    <style>
+        span {
+            color: green;
+        }
+        
+        counter-box {
+            border: 3px solid black;
+        }
+    </style>
+    <script type="module" src="src/igm-footer.js">
+    </script>
+</head>
+
+<body>
+    <counter-box data-count="AAA" data-title="Counter 1" data-min="0" data-max="6"></counter-box>
+    <counter-box data-count="20" data-title="Counter 2" data-min="20" data-max="A0"></counter-box>
+    <counter-box></counter-box>
+
+</body>
+
+</html>

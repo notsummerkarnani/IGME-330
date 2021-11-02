@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Greeter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <input id="firstName" placeholder="First Name">
+    <input id="lastName" placeholder="Last Name">
+    <button id="helloButton">Hello</button>
+    <button id="goodbyeButton">Goodbye</button>
+    <p id="output"></p>
+
+    <script>
+        'use strict';
+
+        let button = document.querySelectorAll("button");
+        button[0].onclick = () => {
+            greeting("Hello")
+        };
+        button[1].onclick = () => {
+            greeting("Goodbye")
+        };
+
+        function greeting(greeting) {
+            document.getElementById("output").style.color = "red";
+            let firstName = document.querySelector("#firstName").value;
+            let lastName = document.querySelector("#lastName").value;
+            if (firstName.length == 0) firstName = "default";
+            if (la  stName.length == 0) lastName = "default";
+            document.querySelector("#output").innerHTML = `${greeting} ${firstName} ${lastName}`;
+        }
+    </script>
+</body>
+
+</html>
