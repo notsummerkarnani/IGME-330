@@ -1,0 +1,323 @@
+<html>
+
+<head>
+    <!--
+	Name: 			animated-curves-playground.html
+	Author: 		Tony Jefferson
+	Last Modified: 	5/28/2015	
+	-->
+
+    <title>Quadratic Bezier curves animation playground</title>
+    <style>
+        body {
+            background-color: #e0e0e0;
+        }
+        
+        canvas {
+            background: #ffffff;
+            cursor: pointer;
+            margin-left: 9px;
+            margin-top: 13px;
+            box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+        
+        p.draggable {
+            position: absolute;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: tahoma, verdana, sans-serif;
+            cursor: move;
+        }
+        
+        #output,
+        #output2 {
+            font-size: 14px;
+            font-family: monospace;
+            display: block;
+            margin-top: 25px;
+        }
+        
+        #controls {
+            font-size: 18px;
+            font-family: tahoma, verdana, sans-serif;
+            margin-top: 25px;
+        }
+        
+        h2,
+        p {
+            font-family: tahoma, verdana, sans-serif;
+        }
+        
+        label+label {
+            margin-left: 15px;
+        }
+    </style>
+    <script>
+        "use strict";
+        // global letiables :-p
+        let canvas, ctx;
+        let startPoint, endPoint, cp1, cp2, controlpoints = [];
+        let selectedElement = null;
+        let vector, speed = 2.0,
+            theta = 0,
+            paused = false;
+
+        window.onload = init;
+
+        function init() {
+            canvas = document.querySelector("canvas");
+            ctx = canvas.getContext("2d");
+            setup();
+            drawQuadraticCurve();
+            drawCubicBezierCurve();
+            ctx.fillStyle = "red";
+            ctx.textAlign = "center"
+            ctx.font = "18px sans-serif";
+            ctx.fillText("Drag the start point, end point,", canvas.width / 2, 50);
+            ctx.fillText("or control point.", canvas.width / 2, 75);
+            vector = getRandomUnitVector();
+            loop();
+        }
+
+        function setup() {
+            let doMouseDown = function(e) {
+                e.preventDefault();
+                selectedElement = e.target;
+                speed = 0;
+            };
+
+            startPoint = document.querySelector("#startPoint");
+            startPoint.name = "start";
+            startPoint.style.left = 0;
+            startPoint.style.top = canvas.height / 2.0;
+            showPosition(startPoint, startPoint.name, {
+                x: startPoint.style.left,
+                y: startPoint.style.top
+            });
+            startPoint.onmousedown = doMouseDown;
+
+            endPoint = document.querySelector("#endPoint");
+            endPoint.name = "end";
+            endPoint.style.left = canvas.width;
+            endPoint.style.top = canvas.height / 2.0;
+            showPosition(endPoint, endPoint.name, {
+                x: endPoint.style.left,
+                y: endPoint.style.top
+            });
+            endPoint.onmousedown = doMouseDown;
+
+            controlpoints = document.querySelectorAll("#controlPoint");
+            let counter = 0;
+
+            while (counter < controlpoints.length) {
+                let obj = controlpoints[counter];
+
+                obj.name = "control " + counter;
+                obj.style.left = canvas.width * (counter / controlpoints.length);
+                obj.style.top = canvas.height * (counter / controlpoints.length);
+                showPosition(obj, obj.name, {
+                    x: obj.style.left,
+                    y: obj.style.top
+                });
+                obj.onmousedown = doMouseDown;
+                counter++;
+            }
+
+            // cp1 = document.querySelector("#cp1");
+            // cp1.name = "control";
+            // cp1.style.left = canvas.width / 2;
+            // cp1.style.top = 10;
+            // showPosition(cp1, cp1.name, {
+            //     x: cp1.style.left,
+            //     y: cp1.style.top
+            // });
+            // cp1.onmousedown = doMouseDown;
+
+            // cp2 = document.querySelector("#cp1");
+            // cp1.name = "control";
+            // cp1.style.left = canvas.width / 2;
+            // cp1.style.top = 10;
+            // showPosition(cp1, cp1.name, {
+            //     x: cp1.style.left,
+            //     y: cp1.style.top
+            // });
+            // cp1.onmousedown = doMouseDown;
+
+            document.onmousemove = function(e) {
+                e.preventDefault();
+                if (selectedElement) {
+                    let mousePos = getMousePos(canvas, e);
+                    selectedElement.style.left = mousePos.x
+                    selectedElement.style.top = mousePos.y
+                    showPosition(selectedElement, selectedElement.name, mousePos);
+                    drawQuadraticCurve();
+                }
+            };
+
+            document.onmouseup = function(e) {
+                selectedElement = null;
+                speed = getRandom(2.0, 15.0);
+                vector = getRandomUnitVector();
+            };
+
+            document.querySelector("#pauseCheckbox").onchange = function(e) {
+                paused = e.target.checked;
+            };
+
+            document.querySelector("#hidePointsCheckbox").onchange = function(e) {
+                let hide = e.target.checked;
+                if (hide) {
+                    startPoint.style.visibility = "hidden";
+                    endPoint.style.visibility = "hidden";
+                    for (let k of controlpoints) {
+                        k.style.visibility = "hidden"
+                    }
+                } else {
+                    startPoint.style.visibility = "visible";
+                    endPoint.style.visibility = "visible";
+                    for (let k of controlpoints) {
+                        k.style.visibility = "visible"
+                    }
+                }
+            };
+            document.querySelector("#hidePointsCheckbox").click();
+        }
+
+        function showPosition(element, name, mousePos) {
+            element.innerHTML = "&nbsp;&nbsp;&nbsp;&bullet; " + name + " (" + mousePos.x + "," + mousePos.y + ")";
+        }
+
+        function getMousePos(parentElement, event) {
+            let rect = parentElement.getBoundingClientRect();
+            return {
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top
+            };
+        }
+
+        function drawQuadraticCurve() {
+            ctx.lineWidth = "3";
+            ctx.strokeStyle = "purple";
+            ctx.beginPath();
+
+            // cast the values from strings to numbers
+            let startX = parseInt(startPoint.style.left);
+            let startY = parseInt(startPoint.style.top);
+            let endX = parseInt(endPoint.style.left);
+            let endY = parseInt(endPoint.style.top);
+            let controlX = parseInt(controlpoints[0].style.left);
+            let controlY = parseInt(controlpoints[0].style.top);
+
+            ctx.moveTo(startX, startY);
+            ctx.quadraticCurveTo(controlX, controlY, endX, endY);
+            ctx.stroke();
+
+            let s0 = "/* Quadratic Bezier Curve */"
+            let s1 = "ctx.moveTo(" + startX + ", " + startY + ");";
+            let s2 = "ctx.quadraticCurveTo(" + controlX + ", " + controlY + ", " + endX + ", " + endY + ");";
+            let s3 = "ctx.stroke();";
+            document.querySelector("#output").innerHTML = s0 + "\n" + s1 + "\n" + s2 + "\n" + s3;
+        }
+
+        function drawCubicBezierCurve() {
+            ctx.lineWidth = "3";
+            ctx.strokeStyle = "purple";
+            ctx.beginPath();
+
+            // cast the values from strings to numbers
+            let startX = parseInt(startPoint.style.left);
+            let startY = parseInt(startPoint.style.top);
+            let endX = parseInt(endPoint.style.left);
+            let endY = parseInt(endPoint.style.top);
+            let cp1X = parseInt(controlpoints[1].style.left);
+            let cp1Y = parseInt(controlpoints[1].style.top);
+            let cp2X = parseInt(controlpoints[2].style.left);
+            let cp2Y = parseInt(controlpoints[2].style.top);
+
+            ctx.moveTo(startX, startY);
+            ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, endX, endY);
+            ctx.stroke();
+
+            let s0 = "/* Cubic Bezier Curve */"
+            let s1 = "ctx.moveTo(" + startX + ", " + startY + ");";
+            let s2 = "ctx.bezierCurveTo(" + cp1X + ", " + cp1Y + ", " + cp2X + ", " + cp2Y + ", " + endX + ", " + endY + ");";
+            let s3 = "ctx.stroke();";
+            document.querySelector("#output2").innerHTML = s0 + "\n" + s1 + "\n" + s2 + "\n" + s3;
+        }
+
+        function loop() {
+            // schedule next frame
+            requestAnimationFrame(loop);
+
+            if (paused) return;
+            clearScreen();
+            let count = 0;
+            for (let k of controlpoints) {
+                let controlX = parseFloat(k.style.left);
+                let controlY = parseFloat(k.style.top);
+
+                controlX = canvas.width / 2 + (Math.sin(theta) * canvas.width / 2) * count / controlpoints.length;
+                controlY = canvas.height / 2 + (Math.cos(theta) * canvas.height / 2) * count / controlpoints.length;
+
+                k.style.left = controlX;
+                k.style.top = controlY;
+                theta += .01;
+                count++;
+
+                showPosition(k, k.name, {
+                    x: parseInt(controlX),
+                    y: parseInt(controlY)
+                });
+            }
+            drawCubicBezierCurve();
+            drawQuadraticCurve();
+        }
+
+        function getRandomUnitVector() {
+            let x = getRandom(-1, 1);
+            let y = getRandom(-1, 1);
+            let length = Math.sqrt(x * x + y * y);
+            if (length == 0) { // very unlikely
+                x = 1; // point right
+                y = 0;
+                length = 1;
+            } else {
+                x /= length;
+                y /= length;
+            }
+
+            return {
+                x: x,
+                y: y
+            };
+        }
+
+
+        function getRandom(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function clearScreen() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    </script>
+</head>
+
+<body>
+    <canvas height="400" width="600"></canvas>
+    <div id="controls">
+        <label>Hide Points <input type="checkbox" id="hidePointsCheckbox"></label>
+        <label>Pause <input type="checkbox" id="pauseCheckbox"></label>
+    </div>
+    <textarea id="output" rows="5" cols="50" readonly spellcheck="false"></textarea>
+    <textarea id="output2" rows="5" cols="50" readonly spellcheck="false"></textarea>
+
+    <p class="draggable" id="startPoint">(?,?)</p>
+    <p class="draggable" id="endPoint">(?,?)</p>
+    <p class="draggable" id="controlPoint">(?,?)</p>
+    <p class="draggable" id="controlPoint">(?,?)</p>
+    <p class="draggable" id="controlPoint">(?,?)</p>
+
+</body>
+
+</html>
