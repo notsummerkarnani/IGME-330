@@ -27,6 +27,14 @@ function drawPose(pose) {
     }
 }
 
+// const drawCircle = (x, y, rad, colour) => {
+//     ctx.save();
+//     ctx.fillStyle = colour;
+//     ctx.arc(x, y, rad, 0, Math.PI * 2, true)
+//     ctx.fill();
+//     ctx.restore();
+// }
+
 const fillText = (ctx, string, x, y, css, colour) => {
     ctx.save();
     ctx.font = css;

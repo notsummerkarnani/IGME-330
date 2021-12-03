@@ -9,6 +9,7 @@
 
 import * as utils from './utils.js';
 import * as canvas from './canvas.js';
+//import * as manager from './manager.js';
 import Rect from './rect.js';
 
 
@@ -38,9 +39,6 @@ let myPose;
 
 let images;
 async function init(tmPose, imageData) {
-
-    console.log("init called");
-    console.log(`Testing utils.getRandomColor() import: ${utils.getRandomColor()}`);
 
     const modelURL = URL + 'model.json';
     const metadataURL = URL + 'metadata.json';
@@ -136,12 +134,12 @@ async function loop() {
                 if (!s.isDead && (s.getRect().containsPoint(wrists['left']) || s.getRect().containsPoint(wrists['right']))) {
                     score++; //console.log('hit');
                     s.isDead = true;
+
                     //if (enemies.length == 0) enemies = utils.createImageSprite(imageData.cage1, Rect, 1);
                 }
 
             } // end for
-            enemies = enemies.filter(s => s.isDead == false)
-            console.log(enemies.length);
+            enemies = enemies.filter(s => s.isDead == false);
             if (enemies.length == 0) enemies = utils.createImageSprite(images.cage1, Rect, 1);
 
             //enemies = enemies.filter(s => { s.speed == 0 })

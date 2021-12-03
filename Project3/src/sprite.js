@@ -1,4 +1,5 @@
 import rect from './rect.js'
+import Circle from './circle.js';
 
 export default class Sprite {
     constructor(x, y, fwd, speed, isDead) {
@@ -25,5 +26,7 @@ export default class Sprite {
     getRect() {
         return new rect(this.x, this.y, this.width, this.height);
     }
+
+
 
 }

@@ -12,4 +12,11 @@ export default class Rect {
         if (this.width <= 0 || this.height <= 0) return false;
         return (point.x >= this.x && point.x <= this.x + this.width && point.y >= this.y && point.y <= this.y + this.height);
     }
+
+    intersectsCircle(circle) {
+        if (!circle) return false;
+        if (this.width <= 0 || this.height <= 0) return false;
+        if (rect.width <= 0 || rect.height <= 0) return false;
+
+    }
 }
