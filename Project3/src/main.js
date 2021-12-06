@@ -25,7 +25,6 @@ let model, webcam, ctx, fps = 60,
     elbows = {};
 
 const GAMESTATE = Object.freeze({
-    INSTRUCTIONS: Symbol("INSTRUCTIONS"),
     MENU: Symbol("MENU"),
     GAME: Symbol("GAME"),
     PAUSE: Symbol("PAUSE"),
@@ -49,20 +48,17 @@ async function init(tmPose, imageData) {
     // Refer to tmPose.loadFromFiles() in the API to support files from a file picker
     model = await tmPose.load(modelURL, metadataURL);
 
-
-
     // append/get elements to the DOM
     canvasElement = document.querySelector("canvas"); // hookup <canvas> element
-    setupUI(canvasElement);
+    setupUI(canvasElement, tmPose);
     canvas.setupCanvas(canvasElement);
     ctx = canvasElement.getContext('2d');
 
     // Convenience function to setup a webcam
-    const flip = true; // whether to flip the webcam
-    webcam = new tmPose.Webcam(canvasElement.width, canvasElement.height, flip); // width, height, flip
-    await webcam.setup(); // request access to the webcam
-    //webcam.play();
-    //window.requestAnimationFrame(loop);
+    // const flip = true; // whether to flip the webcam
+    // webcam = new tmPose.Webcam(canvasElement.width, canvasElement.height, flip); // width, height, flip
+    // await webcam.setup(); // request access to the webcam
+    // webcam.play();
 
     //save imageData and create enemies
     images = imageData;
@@ -72,7 +68,7 @@ async function init(tmPose, imageData) {
         width: canvasElement.width,
         height: canvasElement.height
     });
-    loop();
+    //loop();
 }
 
 async function predict() {
@@ -94,9 +90,6 @@ async function loop() {
     window.requestAnimationFrame(loop, 1 / fps);
 
     switch (state) {
-        case GAMESTATE.INSTRUCTIONS:
-
-            break;
         case GAMESTATE.MENU:
 
             break;
@@ -107,14 +100,15 @@ async function loop() {
                 if (!s.isDead) { // as long as enemy hasnt been hit
                     //if enemy is onscreen
                     if (s.offscreen) { //reflect enemy off walls
-                        if (s.x > 0 && s.x < canvasElement.width) {
+                        if (s.x > 0 && s.x < canvasElement.width - s.width / 2) {
                             s.offscreen = false;
                         }
                     } else {
-                        if (s.x < 0 || s.x > canvasElement.width) {
+                        if (s.x < 0 || s.x > canvasElement.width - s.width / 2) {
                             s.reflectX();
                         }
                     }
+
                     //check for collision with wrists and assign new fwd vector to enemy
                     if (s.getRect().containsPoint(wrists['left'])) {
                         score++;
@@ -140,7 +134,6 @@ async function loop() {
 
                 s.draw(ctx);
 
-
             } // end for
             enemies = enemies.filter(s => !s.offscreen || !s.isDead);
             if (enemies.length == 0) enemies = utils.createImageSprite(images.ufo, Rect, 5, 100, 50, {
@@ -154,7 +147,10 @@ async function loop() {
             canvas.drawHUD(score, health);
             await predict();
             if (!myPose) break;
-            canvas.drawCircle(ctx, myPose[0].position, utils.getDistance(myPose[5].position, myPose[6].position) * .3, 'green'); //draw head
+
+            //Draw Player head using nose and 
+
+            canvas.drawCircle(ctx, myPose[0].position, utils.getDistance(myPose[5].position, myPose[6].position) * .4, 'green');
             canvas.drawRect2(ctx, myPose[5].position, myPose[6].position, myPose[12].position, myPose[11].position, 'black');
             canvas.drawPose(myPose);
             break;
@@ -167,10 +163,8 @@ async function loop() {
     }
 }
 
-function setupUI(canvasElement) {
-    // A - hookup fullscreen button
-    const fsButton = document.querySelector("#fsButton");
-
+//Set up the UI elemeents
+function setupUI(canvasElement, tmPose) {
     // add .onclick event to button
     fsButton.onclick = e => {
         console.log("init called");
@@ -179,10 +173,13 @@ function setupUI(canvasElement) {
 
     playButton.onclick = e => {
         if (state != GAMESTATE.GAME) {
+            //check if webcam is set up, if not show error
+            if (!webcam) {
+                utils.showBanner('is-danger', "Webcam not set up. Set up webcam before playing");
+                return;
+            }
             state = GAMESTATE.GAME;
             playButton.innerText = 'Pause';
-            webcam.play();
-
         } else {
             state = GAMESTATE.PAUSE;
             playButton.innerText = 'Play';
@@ -191,17 +188,23 @@ function setupUI(canvasElement) {
 
         }
     }
+
+    //clear any warning banners if they exist and set up the webcam
+    setupWebcamButton.onclick = e => {
+        utils.clearBanner();
+        setupWebcam(tmPose);
+    }
 } // end setupUI
 
-// function setupWebcam() {
-//     // Convenience function to setup a webcam
-//     const flip = true; // whether to flip the webcam
-//     webcam = new tmPose.Webcam(900, 400, flip); // width, height, flip
-//     await webcam.setup(); // request access to the webcam
-//     webcam.play();
-//     window.requestAnimationFrame(loop);
-// }
-
-
+// Convenience function to setup a webcam
+async function setupWebcam(tmPose) {
+    console.log('Setup Webcam called');
+    if (webcam) return; //check if webcam is already set up
+    const flip = true; // whether to flip the webcam
+    webcam = new tmPose.Webcam(canvasElement.width, canvasElement.height, flip); // width, height, flip
+    await webcam.setup(); // request access to the webcam
+    webcam.play();
+    window.requestAnimationFrame(loop);
+}
 
 export { init };

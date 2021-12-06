@@ -86,6 +86,7 @@ const getDistance = (a, b) => {
     return Math.hypot(d1, d2);
 }
 
+//Creates enemies within the bounding area of the rect
 function createImageSprite(image, type, num = 10, width = 50, height = 50, rect = { left: 0, top: 0, width: 50, height: 50 }) {
 
     let sprites = [];
@@ -105,4 +106,15 @@ function createImageSprite(image, type, num = 10, width = 50, height = 50, rect 
 
 }
 
-export { makeColor, getDistance, getRandomColor, getLinearGradient, goFullscreen, getRandomUnitVector, loadImages, createImageSprite };
+//param type of banner being shown
+//displays message on the screen
+//note the colour is in bulma colours (eg. is-warning for yellow)
+const showBanner = (colour, message) => {
+    warningMessage.innerHTML = `<div class="container notification title ${colour}">${message}</div>`;
+}
+
+const clearBanner = () => {
+    warningMessage.innerHTML = null;
+}
+
+export { clearBanner, makeColor, getDistance, getRandomColor, getLinearGradient, goFullscreen, getRandomUnitVector, loadImages, createImageSprite, showBanner };

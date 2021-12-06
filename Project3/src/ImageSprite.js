@@ -11,6 +11,7 @@ export default class ImageSprite extends sprite {
     }
 
     draw(ctx) {
+        if (this.offscreen && this.isDead) return;
         ctx.save();
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         ctx.restore();
