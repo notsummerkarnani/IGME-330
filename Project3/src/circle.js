@@ -5,7 +5,7 @@ export default class Circle {
         this.radius = radius;
     }
 
-    intersectsCircle(circle) {
+    intersects(circle) {
         if (!circle) return false;
         if (circle.radius <= 0 || this.radius <= 0) return false;
         let d1 = circle.x - this.x;

@@ -78,23 +78,31 @@ function loadImages(imageSources, callback) {
     }
 }
 
-function createImageSprite(image, type, num = 10, width = 50, height = 50, rect = { left: 0, top: 0, width: 100, height: 100 }) {
+//returns the distance between two vectors
+const getDistance = (a, b) => {
+    let d1 = b.x - a.x;
+    let d2 = b.y - a.y;
+
+    return Math.hypot(d1, d2);
+}
+
+function createImageSprite(image, type, num = 10, width = 50, height = 50, rect = { left: 0, top: 0, width: 50, height: 50 }) {
 
     let sprites = [];
     for (let i = 0; i < num; i++) {
         let s = new ImageSprite(Math.random() * rect.width + rect.left,
-            Math.random() * rect.height + rect.top,
-            getRandomUnitVector(),
-            120,
+            Math.random() * rect.height + rect.top, { x: -Math.random(), y: 0 },
+            200,
             false,
             width,
             height,
             image,
-            type);
+            type,
+            true);
         sprites.push(s);
     }
     return sprites;
 
 }
 
-export { makeColor, getRandomColor, getLinearGradient, goFullscreen, getRandomUnitVector, loadImages, createImageSprite };
+export { makeColor, getDistance, getRandomColor, getLinearGradient, goFullscreen, getRandomUnitVector, loadImages, createImageSprite };

@@ -21,9 +21,11 @@ const URL = 'https://teachablemachine.withgoogle.com/models/7tEeCg_ln/';
 
 let model, webcam, ctx, fps = 60,
     canvasElement,
-    wrists = {};
+    wrists = {},
+    elbows = {};
 
 const GAMESTATE = Object.freeze({
+    INSTRUCTIONS: Symbol("INSTRUCTIONS"),
     MENU: Symbol("MENU"),
     GAME: Symbol("GAME"),
     PAUSE: Symbol("PAUSE"),
@@ -47,12 +49,7 @@ async function init(tmPose, imageData) {
     // Refer to tmPose.loadFromFiles() in the API to support files from a file picker
     model = await tmPose.load(modelURL, metadataURL);
 
-    // Convenience function to setup a webcam
-    const flip = true; // whether to flip the webcam
-    webcam = new tmPose.Webcam(900, 400, flip); // width, height, flip
-    await webcam.setup(); // request access to the webcam
-    webcam.play();
-    window.requestAnimationFrame(loop);
+
 
     // append/get elements to the DOM
     canvasElement = document.querySelector("canvas"); // hookup <canvas> element
@@ -60,10 +57,21 @@ async function init(tmPose, imageData) {
     canvas.setupCanvas(canvasElement);
     ctx = canvasElement.getContext('2d');
 
+    // Convenience function to setup a webcam
+    const flip = true; // whether to flip the webcam
+    webcam = new tmPose.Webcam(canvasElement.width, canvasElement.height, flip); // width, height, flip
+    await webcam.setup(); // request access to the webcam
+    //webcam.play();
+    //window.requestAnimationFrame(loop);
+
     //save imageData and create enemies
     images = imageData;
-    enemies = utils.createImageSprite(imageData.cage1, Rect, 5);
-    //console.log(enemies);
+    enemies = utils.createImageSprite(images.ufo, Rect, 5, 100, 50, {
+        left: canvasElement.width,
+        top: 0,
+        width: canvasElement.width,
+        height: canvasElement.height
+    });
     loop();
 }
 
@@ -75,9 +83,88 @@ async function predict() {
         posenetOutput
     } = await model.estimatePose(webcam.canvas);
     if (!pose) return;
-    myPose = pose;
-    wrists.left = pose.keypoints[9].position;
-    wrists.right = pose.keypoints[10].position;
+    myPose = pose.keypoints;
+    elbows.left = myPose[7].position
+    elbows.right = myPose[8].position
+    wrists.left = myPose[9].position;
+    wrists.right = myPose[10].position;
+}
+
+async function loop() {
+    window.requestAnimationFrame(loop, 1 / fps);
+
+    switch (state) {
+        case GAMESTATE.INSTRUCTIONS:
+
+            break;
+        case GAMESTATE.MENU:
+
+            break;
+        case GAMESTATE.GAME:
+            canvas.reset();
+            webcam.update(); // update the webcam frame
+            for (let s of enemies) {
+                if (!s.isDead) { // as long as enemy hasnt been hit
+                    //if enemy is onscreen
+                    if (s.offscreen) { //reflect enemy off walls
+                        if (s.x > 0 && s.x < canvasElement.width) {
+                            s.offscreen = false;
+                        }
+                    } else {
+                        if (s.x < 0 || s.x > canvasElement.width) {
+                            s.reflectX();
+                        }
+                    }
+                    //check for collision with wrists and assign new fwd vector to enemy
+                    if (s.getRect().containsPoint(wrists['left'])) {
+                        score++;
+                        s.isDead = true;
+                        s.fwd.x = (wrists['left'].x - elbows['left'].x) / 10;
+                        s.fwd.y = (wrists['left'].y - elbows['left'].y) / 10;
+                    }
+                    if (s.getRect().containsPoint(wrists['right'])) {
+                        score++;
+                        s.isDead = true;
+                        s.fwd.x = (wrists['right'].x - elbows['right'].x) / 10;
+                        s.fwd.y = (wrists['right'].y - elbows['right'].y) / 10;
+                    }
+
+                } else { //check if enemy has left the screen and mark off
+                    if (s.x < 0 || s.x > canvasElement.width || s.y < 0 || s.y > canvasElement.height) {
+                        s.offscreen = true;
+                    }
+                }
+
+                s.move();
+                // draw sprites
+
+                s.draw(ctx);
+
+
+            } // end for
+            enemies = enemies.filter(s => !s.offscreen || !s.isDead);
+            if (enemies.length == 0) enemies = utils.createImageSprite(images.ufo, Rect, 5, 100, 50, {
+                left: canvasElement.width,
+                top: 0,
+                width: canvasElement.width,
+                height: canvasElement.height
+            });
+
+            //console.log(enemies);
+            canvas.drawHUD(score, health);
+            await predict();
+            if (!myPose) break;
+            canvas.drawCircle(ctx, myPose[0].position, utils.getDistance(myPose[5].position, myPose[6].position) * .3, 'green'); //draw head
+            canvas.drawRect2(ctx, myPose[5].position, myPose[6].position, myPose[12].position, myPose[11].position, 'black');
+            canvas.drawPose(myPose);
+            break;
+        case GAMESTATE.PAUSE:
+
+            break;
+        case GAMESTATE.END:
+
+            break;
+    }
 }
 
 function setupUI(canvasElement) {
@@ -94,7 +181,7 @@ function setupUI(canvasElement) {
         if (state != GAMESTATE.GAME) {
             state = GAMESTATE.GAME;
             playButton.innerText = 'Pause';
-
+            webcam.play();
 
         } else {
             state = GAMESTATE.PAUSE;
@@ -106,56 +193,15 @@ function setupUI(canvasElement) {
     }
 } // end setupUI
 
-async function loop() {
-    window.requestAnimationFrame(loop, 1 / fps);
+// function setupWebcam() {
+//     // Convenience function to setup a webcam
+//     const flip = true; // whether to flip the webcam
+//     webcam = new tmPose.Webcam(900, 400, flip); // width, height, flip
+//     await webcam.setup(); // request access to the webcam
+//     webcam.play();
+//     window.requestAnimationFrame(loop);
+// }
 
-    switch (state) {
-        case GAMESTATE.MENU:
 
-            break;
-        case GAMESTATE.GAME:
-            canvas.reset();
-            webcam.update(); // update the webcam frame
-            for (let s of enemies) {
-                if (s.x < 0 || s.x > canvasElement.width) {
-                    s.reflectX();
-                }
-                if (s.y < 0 || s.y > canvasElement.height) {
-                    s.reflectY();
-                }
-
-                s.move();
-                // draw sprites
-
-                s.draw(ctx);
-
-                //console.log(s.getRect()); //.containsPoint({ x: 30, y: 30 }));
-                //console.log(wrists['left']) // + " " + wrists.right);
-                if (!s.isDead && (s.getRect().containsPoint(wrists['left']) || s.getRect().containsPoint(wrists['right']))) {
-                    score++; //console.log('hit');
-                    s.isDead = true;
-
-                    //if (enemies.length == 0) enemies = utils.createImageSprite(imageData.cage1, Rect, 1);
-                }
-
-            } // end for
-            enemies = enemies.filter(s => s.isDead == false);
-            if (enemies.length == 0) enemies = utils.createImageSprite(images.cage1, Rect, 1);
-
-            //enemies = enemies.filter(s => { s.speed == 0 })
-            //console.log(enemies);
-            canvas.drawHUD(score, health);
-            await predict();
-            if (!myPose) break;
-            canvas.drawPose(myPose);
-            break;
-        case GAMESTATE.PAUSE:
-
-            break;
-        case GAMESTATE.END:
-
-            break;
-    }
-}
 
 export { init };

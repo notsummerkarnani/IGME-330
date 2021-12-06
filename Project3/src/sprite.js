@@ -27,6 +27,10 @@ export default class Sprite {
         return new rect(this.x, this.y, this.width, this.height);
     }
 
+    getCircle() {
+        return new Circle(this.x + this.width / 2, this.y + this.height / 2, this.width / 2)
+    }
+
 
 
 }
