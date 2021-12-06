@@ -27,6 +27,18 @@ export default class Sprite {
         return new rect(this.x, this.y, this.width, this.height);
     }
 
+    // isColliding(rect) {
+    //     myRect = new rect(this.x, this.y, this.width, this.height);
+
+    //     if (rect.x < myRect.x + myRect.width &&
+    //         rect.x + rect.width > myRect.x &&
+    //         rect.y < myRect.y + myRect.height &&
+    //         rect.height + rect.y > myRect.y) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
+
     getCircle() {
         return new Circle(this.x + this.width / 2, this.y + this.height / 2, this.width / 2)
     }

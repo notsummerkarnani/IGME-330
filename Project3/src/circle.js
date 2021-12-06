@@ -1,7 +1,7 @@
 export default class Circle {
-    constructor(x, y, radius) {
-        this.x = x;
-        this.y = y;
+    constructor(position = { x: 0, y: 0 }, radius = 0) {
+        this.x = position.x;
+        this.y = position.y;
         this.radius = radius;
     }
 
@@ -11,6 +11,6 @@ export default class Circle {
         let d1 = circle.x - this.x;
         let d2 = circle.y - this.y;
 
-        return (this.radius <= Math.sqrt(d1 * d1 + d2 * d2));
+        return (this.radius + circle.radius >= Math.hypot(d1, d2));
     }
 }

@@ -16,4 +16,6 @@ export default class ImageSprite extends sprite {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         ctx.restore();
     }
+
+
 }

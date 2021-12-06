@@ -9,8 +9,8 @@
 
 import * as utils from './utils.js';
 import * as canvas from './canvas.js';
-//import * as manager from './manager.js';
 import Rect from './rect.js';
+import Circle from './circle.js';
 
 
 // More API functions here:
@@ -54,12 +54,6 @@ async function init(tmPose, imageData) {
     canvas.setupCanvas(canvasElement);
     ctx = canvasElement.getContext('2d');
 
-    // Convenience function to setup a webcam
-    // const flip = true; // whether to flip the webcam
-    // webcam = new tmPose.Webcam(canvasElement.width, canvasElement.height, flip); // width, height, flip
-    // await webcam.setup(); // request access to the webcam
-    // webcam.play();
-
     //save imageData and create enemies
     images = imageData;
     enemies = utils.createImageSprite(images.ufo, Rect, 5, 100, 50, {
@@ -96,6 +90,13 @@ async function loop() {
         case GAMESTATE.GAME:
             canvas.reset();
             webcam.update(); // update the webcam frame
+
+            //console.log(enemies);
+            canvas.drawHUD(score, health);
+            await predict();
+            if (!myPose) break;
+
+
             for (let s of enemies) {
                 if (!s.isDead) { // as long as enemy hasnt been hit
                     //if enemy is onscreen
@@ -109,18 +110,30 @@ async function loop() {
                         }
                     }
 
+                    //Checking collision between a rect and point
                     //check for collision with wrists and assign new fwd vector to enemy
-                    if (s.getRect().containsPoint(wrists['left'])) {
+                    // if (s.getRect().containsPoint(wrists['left'])) {
+                    //     return;
+                    //     score++;
+                    //     s.isDead = true;
+                    //     s.fwd.x = (wrists['left'].x - elbows['left'].x) / 10;
+                    //     s.fwd.y = (wrists['left'].y - elbows['left'].y) / 10;
+                    // }
+                    // if (s.getRect().containsPoint(wrists['right'])) {
+                    //     score++;
+                    //     s.isDead = true;
+                    //     s.fwd.x = (wrists['right'].x - elbows['right'].x) / 10;
+                    //     s.fwd.y = (wrists['right'].y - elbows['right'].y) / 10;
+                    // }
+
+
+                    let enemyCircle = s.getCircle();
+                    //checking collision between wrist circle and enemy circle
+                    if (enemyCircle.intersects(new Circle(wrists['left'].x, wrists['left'].y, 10))) {
                         score++;
                         s.isDead = true;
                         s.fwd.x = (wrists['left'].x - elbows['left'].x) / 10;
                         s.fwd.y = (wrists['left'].y - elbows['left'].y) / 10;
-                    }
-                    if (s.getRect().containsPoint(wrists['right'])) {
-                        score++;
-                        s.isDead = true;
-                        s.fwd.x = (wrists['right'].x - elbows['right'].x) / 10;
-                        s.fwd.y = (wrists['right'].y - elbows['right'].y) / 10;
                     }
 
                 } else { //check if enemy has left the screen and mark off
@@ -143,15 +156,17 @@ async function loop() {
                 height: canvasElement.height
             });
 
-            //console.log(enemies);
-            canvas.drawHUD(score, health);
-            await predict();
-            if (!myPose) break;
 
-            //Draw Player head using nose and 
 
+            //Draw Player head using nose and 40% of the distance between the shoulders as radius
             canvas.drawCircle(ctx, myPose[0].position, utils.getDistance(myPose[5].position, myPose[6].position) * .4, 'green');
+
+            //Draw the torso of the player using 
+            //myPose[5].position, myPose[6].position, myPose[12].position, myPose[11].position
+            // left shoulder, right shoulder, right hip, left hip
             canvas.drawRect2(ctx, myPose[5].position, myPose[6].position, myPose[12].position, myPose[11].position, 'black');
+
+            //draw the pose
             canvas.drawPose(myPose);
             break;
         case GAMESTATE.PAUSE:

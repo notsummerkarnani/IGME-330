@@ -37,14 +37,6 @@ const drawCircle = (ctx, position = { x: 0, y: 0 }, rad, colour) => {
     ctx.restore();
 }
 
-const drawRect = (ctx, position = { x: 0, y: 0 }, width, height, colour) => {
-    ctx.save();
-    ctx.fillStyle = colour;
-    ctx.fillRect(position.x, position.y, width, height);
-    ctx.fill();
-    ctx.restore();
-}
-
 const drawRect2 = (ctx, position0 = { x: 0, y: 0 }, position1 = { x: 0, y: 0 }, position2 = { x: 0, y: 0 }, position3 = { x: 0, y: 0 }, colour) => {
     ctx.save();
     ctx.fillStyle = colour;
