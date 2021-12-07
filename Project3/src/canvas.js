@@ -1,55 +1,59 @@
 /*
-	The purpose of this file is to take in the analyser node and a <canvas> element: 
-	  - the module will create a drawing context that points at the <canvas> 
-	  - it will store the reference to the analyser node
-	  - in draw(), it will loop through the data in the analyser node
-	  - and then draw something representative on the canvas
-	  - maybe a better name for this file/module would be *visualizer.js* ?
+	The purpose of this file is to include all the drawing code in one file to clear up the main loop
 */
 
 import * as utils from './utils.js';
 
 let ctx, canvasWidth, canvasHeight, gradient;
 
+const minPartConfidence = .5;
+
+//Draws a circle at position (x,y) with radius and colour specified
+const drawCircle = (x = 0, y = 0, rad, colour) => {
+    ctx.save();
+    ctx.fillStyle = colour;
+    ctx.beginPath();
+    ctx.arc(x, y, rad, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
 function drawPose(pose) {
     //ctx.drawImage(webcam.canvas, 0, 0);
     // draw the keypoints and skeleton
     if (pose) {
 
-        const minPartConfidence = .5;
+        //Draw the torso of the player using 
+        //pose[5].position, pose[6].position, pose[12].position, pose[11].position
+        // left shoulder, right shoulder, right hip, left hip
+        drawQuad(pose[5].position, pose[6].position, pose[12].position, pose[11].position, 'black');
+
         tmPose.drawKeypoints(pose, minPartConfidence, ctx, 5, 'black');
         tmPose.drawSkeleton(pose, minPartConfidence, ctx, 3, 'black');
 
         //draw wrist points
         tmPose.drawPoint(ctx, pose[9].position.y, pose[9].position.x, 12, 'red', 'black');
         tmPose.drawPoint(ctx, pose[10].position.y, pose[10].position.x, 12, 'red', 'black');
-
     }
 }
 
-const drawCircle = (ctx, position = { x: 0, y: 0 }, rad, colour) => {
+//Draws a quad with 4 specified points and fills it
+const drawQuad = (position0 = { x: 0, y: 0 }, position1 = { x: 0, y: 0 }, position2 = { x: 0, y: 0 }, position3 = { x: 0, y: 0 }, colour) => {
     ctx.save();
     ctx.fillStyle = colour;
     ctx.beginPath();
-    ctx.arc(position.x, position.y, rad, 0, Math.PI * 2, true);
+    ctx.moveTo(position0.x, position0.y);
+    ctx.lineTo(position1.x, position1.y);
+    ctx.lineTo(position2.x, position2.y);
+    ctx.lineTo(position3.x, position3.y);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
 }
 
-const drawRect2 = (ctx, position0 = { x: 0, y: 0 }, position1 = { x: 0, y: 0 }, position2 = { x: 0, y: 0 }, position3 = { x: 0, y: 0 }, colour) => {
-    ctx.save();
-    ctx.fillStyle = colour;
-    ctx.moveTo(position0.x, position0.y);
-    ctx.lineTo(position1.x, position1.y);
-    ctx.lineTo(position2.x, position2.y);
-    ctx.lineTo(position3.x, position3.y);
-
-    ctx.fill();
-    ctx.restore();
-}
-
-const fillText = (ctx, string, x, y, css, colour) => {
+//draw text to the screen and fill it
+const fillText = (string, x, y, css, colour) => {
     ctx.save();
     ctx.font = css;
     ctx.fillStyle = colour;
@@ -88,17 +92,17 @@ function setupCanvas(canvasElement) {
     // Draw Text
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    fillText(ctx, "Welcome to", canvasWidth / 2, canvasHeight / 2 - 110, "40pt 'Press Start 2P', cursive", "red");
-    strokeText(ctx, "Welcome to", canvasWidth / 2, canvasHeight / 2 - 110, "40pt 'Press Start 2P', cursive", "black", 2);
-    fillText(ctx, "Shadow Boxer", canvasWidth / 2, canvasHeight / 2 - 40, "74pt 'Press Start 2P', cursive", "red");
-    strokeText(ctx, "Shadow Boxer", canvasWidth / 2, canvasHeight / 2 - 40, "74pt 'Press Start 2P', cursive", "black", 2);
-    fillText(ctx, "Press 'Play' to start!", canvasWidth / 2, canvasHeight / 2 + 30, "40pt 'Press Start 2P', cursive", "red");
-    strokeText(ctx, "Press 'Play' to start!", canvasWidth / 2, canvasHeight / 2 + 30, "40pt 'Press Start 2P', cursive", "black", 2);
-    fillText(ctx, "Make sure your whole upper body is in frame", canvasWidth / 2, canvasHeight / 2 + 80, "25pt 'Press Start 2P', cursive", "red");
-    strokeText(ctx, "Make sure your whole upper body is in frame", canvasWidth / 2, canvasHeight / 2 + 80, "25pt 'Press Start 2P', cursive", "black", 2);
+    fillText("Welcome to", canvasWidth / 2, canvasHeight / 2 - 110, "40pt 'Press Start 2P', cursive", "red");
+    strokeText("Welcome to", canvasWidth / 2, canvasHeight / 2 - 110, "40pt 'Press Start 2P', cursive", "black", 2);
+    fillText("Shadow Boxer", canvasWidth / 2, canvasHeight / 2 - 40, "74pt 'Press Start 2P', cursive", "red");
+    strokeText("Shadow Boxer", canvasWidth / 2, canvasHeight / 2 - 40, "74pt 'Press Start 2P', cursive", "black", 2);
+    fillText("Press 'Play' to start!", canvasWidth / 2, canvasHeight / 2 + 30, "40pt 'Press Start 2P', cursive", "red");
+    strokeText("Press 'Play' to start!", canvasWidth / 2, canvasHeight / 2 + 30, "40pt 'Press Start 2P', cursive", "black", 2);
+    fillText("Make sure your whole upper body is in frame", canvasWidth / 2, canvasHeight / 2 + 80, "25pt 'Press Start 2P', cursive", "red");
+    strokeText("Make sure your whole upper body is in frame", canvasWidth / 2, canvasHeight / 2 + 80, "25pt 'Press Start 2P', cursive", "black", 2);
 }
 
-const strokeText = (ctx, string, x, y, css, colour, lineWidth) => {
+const strokeText = (string, x, y, css, colour, lineWidth) => {
     ctx.save();
     ctx.font = css;
     ctx.strokeStyle = colour;
@@ -108,7 +112,7 @@ const strokeText = (ctx, string, x, y, css, colour, lineWidth) => {
 }
 
 const drawHUD = (score, health) => {
-    fillText(ctx, `Score: ${score}`, 100, 20, "20pt courier", "black");
-    fillText(ctx, `Health: ${health}`, canvasWidth - 110, 20, "20pt courier", "black");
+    fillText(`Score: ${score}`, 100, 20, "20pt courier", "black");
+    fillText(`Health: ${health}`, canvasWidth - 110, 20, "20pt courier", "black");
 }
-export { setupCanvas, drawPose, reset, fillText, strokeText, drawHUD, drawCircle, drawRect2 };
+export { setupCanvas, drawPose, reset, fillText, strokeText, drawHUD, drawCircle, drawQuad };

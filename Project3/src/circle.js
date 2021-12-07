@@ -1,7 +1,7 @@
 export default class Circle {
-    constructor(position = { x: 0, y: 0 }, radius = 0) {
-        this.x = position.x;
-        this.y = position.y;
+    constructor(x, y, radius = 0) {
+        this.x = x;
+        this.y = y;
         this.radius = radius;
     }
 

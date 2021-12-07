@@ -9,7 +9,6 @@
 
 import * as utils from './utils.js';
 import * as canvas from './canvas.js';
-import Rect from './rect.js';
 import Circle from './circle.js';
 
 
@@ -31,14 +30,18 @@ const GAMESTATE = Object.freeze({
     END: Symbol("END")
 });
 
+const enemyDimensions = { width: 100, height: 50 };
+const hitpointRad = 5;
 let state = GAMESTATE.MENU;
 
 let enemies = [];
+let hitpoints = {};
 let score = 0;
 let health = 100;
 let myPose;
-
 let images;
+
+
 async function init(tmPose, imageData) {
 
     const modelURL = URL + 'model.json';
@@ -56,7 +59,7 @@ async function init(tmPose, imageData) {
 
     //save imageData and create enemies
     images = imageData;
-    enemies = utils.createImageSprite(images.ufo, Rect, 5, 100, 50, {
+    enemies = utils.createImageSprite(images.ufo, Circle, 5, enemyDimensions.width, enemyDimensions.height, {
         left: canvasElement.width,
         top: 0,
         width: canvasElement.width,
@@ -74,8 +77,26 @@ async function predict() {
     } = await model.estimatePose(webcam.canvas);
     if (!pose) return;
     myPose = pose.keypoints;
-    elbows.left = myPose[7].position
-    elbows.right = myPose[8].position
+    //console.log(myPose);
+
+    //Use nose as center and 40% of the distance between the shoulders as radius
+    let head = new Circle(myPose[0].position.x, myPose[0].position.y, utils.getDistance(myPose[5].position, myPose[6].position) * .4)
+
+    let shoulder1 = new Circle(myPose[5].position.x, myPose[5].position.y, hitpointRad);
+    let shoulder2 = new Circle(myPose[6].position.x, myPose[6].position.y, hitpointRad);
+
+    let elbow1 = new Circle(myPose[7].position.x, myPose[7].position.y, hitpointRad);
+    let elbow2 = new Circle(myPose[8].position.x, myPose[8].position.y, hitpointRad);
+
+    hitpoints = {
+        'head': head,
+        'shoulder1': shoulder1,
+        'shoulder2': shoulder2,
+        'elbow1': elbow1,
+        'elbow2': elbow2,
+    };
+    elbows.left = myPose[7].position;
+    elbows.right = myPose[8].position;
     wrists.left = myPose[9].position;
     wrists.right = myPose[10].position;
 }
@@ -91,12 +112,17 @@ async function loop() {
             canvas.reset();
             webcam.update(); // update the webcam frame
 
-            //console.log(enemies);
             canvas.drawHUD(score, health);
             await predict();
             if (!myPose) break;
 
+            //Draw Player head
+            canvas.drawCircle(hitpoints['head'].x, hitpoints['head'].y, hitpoints['head'].radius, 'green');
 
+            //draw the pose
+            canvas.drawPose(myPose);
+
+            //loop through enemies
             for (let s of enemies) {
                 if (!s.isDead) { // as long as enemy hasnt been hit
                     //if enemy is onscreen
@@ -110,23 +136,6 @@ async function loop() {
                         }
                     }
 
-                    //Checking collision between a rect and point
-                    //check for collision with wrists and assign new fwd vector to enemy
-                    // if (s.getRect().containsPoint(wrists['left'])) {
-                    //     return;
-                    //     score++;
-                    //     s.isDead = true;
-                    //     s.fwd.x = (wrists['left'].x - elbows['left'].x) / 10;
-                    //     s.fwd.y = (wrists['left'].y - elbows['left'].y) / 10;
-                    // }
-                    // if (s.getRect().containsPoint(wrists['right'])) {
-                    //     score++;
-                    //     s.isDead = true;
-                    //     s.fwd.x = (wrists['right'].x - elbows['right'].x) / 10;
-                    //     s.fwd.y = (wrists['right'].y - elbows['right'].y) / 10;
-                    // }
-
-
                     let enemyCircle = s.getCircle();
                     //checking collision between wrist circle and enemy circle
                     if (enemyCircle.intersects(new Circle(wrists['left'].x, wrists['left'].y, 10))) {
@@ -135,39 +144,45 @@ async function loop() {
                         s.fwd.x = (wrists['left'].x - elbows['left'].x) / 10;
                         s.fwd.y = (wrists['left'].y - elbows['left'].y) / 10;
                     }
+                    if (enemyCircle.intersects(new Circle(wrists['right'].x, wrists['right'].y, 10))) {
+                        score++;
+                        s.isDead = true;
+                        s.fwd.x = (wrists['right'].x - elbows['right'].x) / 10;
+                        s.fwd.y = (wrists['right'].y - elbows['right'].y) / 10;
+                    }
 
+                    //check collision with hitpoints
+                    for (let k of Object.keys(hitpoints)) {
+                        if (enemyCircle.intersects(hitpoints[k])) {
+                            health -= 10;
+                            s.isDead = true;
+                            s.offscreen = true;
+                            if (health < 10) {
+                                state = GAMESTATE.END;
+                            }
+                        }
+                    }
                 } else { //check if enemy has left the screen and mark off
                     if (s.x < 0 || s.x > canvasElement.width || s.y < 0 || s.y > canvasElement.height) {
                         s.offscreen = true;
                     }
                 }
-
                 s.move();
                 // draw sprites
-
                 s.draw(ctx);
 
             } // end for
+
+            //remove enemies that have been hit and are off screen
             enemies = enemies.filter(s => !s.offscreen || !s.isDead);
-            if (enemies.length == 0) enemies = utils.createImageSprite(images.ufo, Rect, 5, 100, 50, {
+            //create more enemies
+            if (enemies.length == 0) enemies = utils.createImageSprite(images.ufo, Circle, 5, enemyDimensions.width, enemyDimensions.height, {
                 left: canvasElement.width,
                 top: 0,
                 width: canvasElement.width,
                 height: canvasElement.height
             });
 
-
-
-            //Draw Player head using nose and 40% of the distance between the shoulders as radius
-            canvas.drawCircle(ctx, myPose[0].position, utils.getDistance(myPose[5].position, myPose[6].position) * .4, 'green');
-
-            //Draw the torso of the player using 
-            //myPose[5].position, myPose[6].position, myPose[12].position, myPose[11].position
-            // left shoulder, right shoulder, right hip, left hip
-            canvas.drawRect2(ctx, myPose[5].position, myPose[6].position, myPose[12].position, myPose[11].position, 'black');
-
-            //draw the pose
-            canvas.drawPose(myPose);
             break;
         case GAMESTATE.PAUSE:
 
@@ -180,6 +195,11 @@ async function loop() {
 
 //Set up the UI elemeents
 function setupUI(canvasElement, tmPose) {
+
+    //hide buttons until webcam is set up
+    playButton.style.visibility = "hidden";
+    fsButton.style.visibility = "hidden";
+
     // add .onclick event to button
     fsButton.onclick = e => {
         console.log("init called");
@@ -198,16 +218,19 @@ function setupUI(canvasElement, tmPose) {
         } else {
             state = GAMESTATE.PAUSE;
             playButton.innerText = 'Play';
-            canvas.fillText(ctx, "Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "red");
-            canvas.strokeText(ctx, "Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "black", 2);
-
+            canvas.fillText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "red");
+            canvas.strokeText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "black", 2);
         }
     }
 
     //clear any warning banners if they exist and set up the webcam
+    //Set the hidden buttons as visible and hide this one
     setupWebcamButton.onclick = e => {
         utils.clearBanner();
         setupWebcam(tmPose);
+        playButton.style.visibility = "visible";
+        fsButton.style.visibility = "visible";
+        e.target.style.visibility = "hidden";
     }
 } // end setupUI
 

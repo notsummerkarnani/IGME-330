@@ -13,5 +13,13 @@ export default class Rect {
         return (point.x >= this.x && point.x <= this.x + this.width && point.y >= this.y && point.y <= this.y + this.height);
     }
 
-
+    isColliding(rect) {
+        if (rect.x < this.x + this.width &&
+            rect.x + rect.width > this.x &&
+            rect.y < this.y + this.height &&
+            rect.height + rect.y > this.y) {
+            return true;
+        }
+        return false;
+    }
 }
