@@ -7,7 +7,7 @@ template.innerHTML = `
     <!-- logo / brand -->
     <div class="navbar-brand">
         <a class="navbar-item fa-2x" href="app.html">
-            <i class="fas fa-gamepad fa-spin"></i>
+            <i class="fas fa-gamepad"></i>
         </a>
         <a class="navbar-burger" id="burger">
                 <span></span>

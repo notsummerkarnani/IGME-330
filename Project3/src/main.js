@@ -20,8 +20,7 @@ const URL = 'https://teachablemachine.withgoogle.com/models/7tEeCg_ln/';
 
 let model, webcam, ctx, fps = 60,
     canvasElement,
-    wrists = {},
-    elbows = {};
+    eyes = {};
 
 const GAMESTATE = Object.freeze({
     MENU: Symbol("MENU"),
@@ -31,13 +30,14 @@ const GAMESTATE = Object.freeze({
 });
 
 const enemyDimensions = { width: 100, height: 50 };
-const hitpointRad = 5;
+const hitpointRad = 10;
 let state = GAMESTATE.MENU;
 
 let enemies = [];
 let hitpoints = {};
 let score = 0;
 let health = 100;
+let enemySpeed = 150;
 let myPose;
 let images;
 
@@ -59,9 +59,7 @@ async function init(tmPose, imageData) {
 
     //save imageData and create enemies
     images = imageData;
-    enemies = utils.createImageSprite(images.ufo, Circle, 5, enemyDimensions.width, enemyDimensions.height, {
-        left: canvasElement.width,
-        top: 0,
+    enemies = utils.createImageSprite(images.ufo, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
         width: canvasElement.width,
         height: canvasElement.height
     });
@@ -77,28 +75,23 @@ async function predict() {
     } = await model.estimatePose(webcam.canvas);
     if (!pose) return;
     myPose = pose.keypoints;
-    //console.log(myPose);
 
-    //Use nose as center and 40% of the distance between the shoulders as radius
-    let head = new Circle(myPose[0].position.x, myPose[0].position.y, utils.getDistance(myPose[5].position, myPose[6].position) * .4)
-
-    let shoulder1 = new Circle(myPose[5].position.x, myPose[5].position.y, hitpointRad);
-    let shoulder2 = new Circle(myPose[6].position.x, myPose[6].position.y, hitpointRad);
-
-    let elbow1 = new Circle(myPose[7].position.x, myPose[7].position.y, hitpointRad);
-    let elbow2 = new Circle(myPose[8].position.x, myPose[8].position.y, hitpointRad);
-
+    let shoulderWidth = utils.getDistance(myPose[5].position, myPose[6].position);
     hitpoints = {
-        'head': head,
-        'shoulder1': shoulder1,
-        'shoulder2': shoulder2,
-        'elbow1': elbow1,
-        'elbow2': elbow2,
+        'head': new Circle(myPose[0].position.x, myPose[0].position.y, shoulderWidth * .4), //Use nose as center and 40% of the distance between the shoulders as radius
+        'chest': new Circle(myPose[6].position.x + (myPose[11].position.x - myPose[6].position.x) / 2, myPose[6].position.y + (myPose[11].position.y - myPose[6].position.y) / 2, shoulderWidth / 2),
+        'shoulder1': new Circle(myPose[5].position.x, myPose[5].position.y, hitpointRad),
+        'shoulder2': new Circle(myPose[6].position.x, myPose[6].position.y, hitpointRad),
+        'elbow1': new Circle(myPose[7].position.x, myPose[7].position.y, hitpointRad),
+        'elbow2': new Circle(myPose[8].position.x, myPose[8].position.y, hitpointRad),
+        'wrist1': new Circle(myPose[9].position.x, myPose[9].position.y, hitpointRad),
+        'wrist2': new Circle(myPose[10].position.x, myPose[10].position.y, hitpointRad)
     };
-    elbows.left = myPose[7].position;
-    elbows.right = myPose[8].position;
-    wrists.left = myPose[9].position;
-    wrists.right = myPose[10].position;
+
+    eyes = {
+        'left': new Circle(myPose[1].position.x, myPose[1].position.y, shoulderWidth * .05),
+        'right': new Circle(myPose[2].position.x, myPose[2].position.y, shoulderWidth * .05)
+    };
 }
 
 async function loop() {
@@ -109,19 +102,23 @@ async function loop() {
 
             break;
         case GAMESTATE.GAME:
-            canvas.reset();
             webcam.update(); // update the webcam frame
+            if (myPose) {
+                canvas.drawHUD(score, health);
 
-            canvas.drawHUD(score, health);
-            await predict();
-            if (!myPose) break;
+                //Draw Player head
+                canvas.drawCircle(hitpoints['head'].x, hitpoints['head'].y, hitpoints['head'].radius, 'black');
 
-            //Draw Player head
-            canvas.drawCircle(hitpoints['head'].x, hitpoints['head'].y, hitpoints['head'].radius, 'green');
+                //Draw eyes
+                canvas.drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius, 'white');
+                canvas.drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius - 3, 'black');
 
-            //draw the pose
-            canvas.drawPose(myPose);
+                canvas.drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius, 'white');
+                canvas.drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius - 3, 'black');
 
+                //draw the pose
+                canvas.drawPose(myPose);
+            }
             //loop through enemies
             for (let s of enemies) {
                 if (!s.isDead) { // as long as enemy hasnt been hit
@@ -137,28 +134,31 @@ async function loop() {
                     }
 
                     let enemyCircle = s.getCircle();
-                    //checking collision between wrist circle and enemy circle
-                    if (enemyCircle.intersects(new Circle(wrists['left'].x, wrists['left'].y, 10))) {
-                        score++;
-                        s.isDead = true;
-                        s.fwd.x = (wrists['left'].x - elbows['left'].x) / 10;
-                        s.fwd.y = (wrists['left'].y - elbows['left'].y) / 10;
-                    }
-                    if (enemyCircle.intersects(new Circle(wrists['right'].x, wrists['right'].y, 10))) {
-                        score++;
-                        s.isDead = true;
-                        s.fwd.x = (wrists['right'].x - elbows['right'].x) / 10;
-                        s.fwd.y = (wrists['right'].y - elbows['right'].y) / 10;
-                    }
 
                     //check collision with hitpoints
                     for (let k of Object.keys(hitpoints)) {
                         if (enemyCircle.intersects(hitpoints[k])) {
-                            health -= 10;
-                            s.isDead = true;
-                            s.offscreen = true;
-                            if (health < 10) {
-                                state = GAMESTATE.END;
+                            if (k == 'wrist1') { //check if its a wrist
+                                score++;
+                                s.isDead = true;
+
+                                //set enemy direction to reflect the punch
+                                s.fwd.x = (hitpoints['wrist1'].x - hitpoints['elbow1'].x) / 10;
+                                s.fwd.y = (hitpoints['wrist1'].y - hitpoints['elbow1'].y) / 10;
+                            } else if (k == 'wrist2') { //check if its a wrist
+                                score++;
+                                s.isDead = true;
+
+                                //set enemy direction to reflect the punch
+                                s.fwd.x = (hitpoints['wrist2'].x - hitpoints['elbow2'].x) / 10;
+                                s.fwd.y = (hitpoints['wrist2'].y - hitpoints['elbow2'].y) / 10;
+                            } else {
+                                health -= 10;
+                                s.isDead = true;
+                                s.offscreen = true;
+                                if (health < 10) {
+                                    state = GAMESTATE.END;
+                                }
                             }
                         }
                     }
@@ -176,19 +176,40 @@ async function loop() {
             //remove enemies that have been hit and are off screen
             enemies = enemies.filter(s => !s.offscreen || !s.isDead);
             //create more enemies
-            if (enemies.length == 0) enemies = utils.createImageSprite(images.ufo, Circle, 5, enemyDimensions.width, enemyDimensions.height, {
-                left: canvasElement.width,
-                top: 0,
+            if (enemies.length == 0) enemies = utils.createImageSprite(images.ufo, Circle, 5, enemySpeed + score, enemyDimensions.width, enemyDimensions.height, {
                 width: canvasElement.width,
                 height: canvasElement.height
             });
 
+            await predict();
+
+            canvas.reset();
             break;
         case GAMESTATE.PAUSE:
 
             break;
         case GAMESTATE.END:
+            canvas.reset();
+            webcam.update();
+            if (myPose) {
+                canvas.drawHUD(score, health);
+                //Draw Player head
+                canvas.drawCircle(hitpoints['head'].x, hitpoints['head'].y, hitpoints['head'].radius, 'black');
+                //Draw eyes
+                canvas.drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius, 'white');
+                canvas.drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius - 3, 'black');
 
+                canvas.drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius, 'white');
+                canvas.drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius - 3, 'black');
+
+                //draw the pose
+                canvas.drawPose(myPose);
+            }
+            canvas.fillText("You suck", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt 'Press Start 2P', cursive", "red");
+            canvas.strokeText("You suck", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt 'Press Start 2P', cursive", "black", 2);
+
+            await predict();
+            canvas.reset();
             break;
     }
 }
@@ -230,7 +251,7 @@ function setupUI(canvasElement, tmPose) {
         setupWebcam(tmPose);
         playButton.style.visibility = "visible";
         fsButton.style.visibility = "visible";
-        e.target.style.visibility = "hidden";
+        e.target.style.display = "none";
     }
 } // end setupUI
 

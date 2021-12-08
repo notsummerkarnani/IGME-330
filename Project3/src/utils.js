@@ -86,20 +86,28 @@ const getDistance = (a, b) => {
     return Math.hypot(d1, d2);
 }
 
-//Creates enemies within the bounding area of the rect
-function createImageSprite(image, type, num = 10, width = 50, height = 50, rect = { left: 0, top: 0, width: 50, height: 50 }) {
+//Creates enemies outside the bounding area of the rect moving towards it
+function createImageSprite(image, type, num = 10, speed = 100, width = 50, height = 50, canvas = { width: 900, height: 400 }) {
 
     let sprites = [];
     for (let i = 0; i < num; i++) {
-        let s = new ImageSprite(Math.random() * rect.width + rect.left,
-            Math.random() * rect.height + rect.top, { x: -Math.random(), y: 0 },
-            200,
+        //create objects on the rignt of the canvas
+        let s = new ImageSprite(Math.random() * canvas.width + canvas.width,
+            Math.random() * 0.7 * canvas.height + canvas.height * .15, { x: -Math.random() - .5, y: 0 },
+            speed,
             false,
             width,
             height,
             image,
             type,
             true);
+
+        //randomly change objects to the left
+        if (Math.random() >= .5) {
+            s.x *= -1;
+            s.x += canvas.width;
+            s.fwd.x *= -1;
+        }
         sprites.push(s);
     }
     return sprites;

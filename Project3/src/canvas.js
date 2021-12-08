@@ -9,7 +9,8 @@ let ctx, canvasWidth, canvasHeight, gradient;
 const minPartConfidence = .5;
 
 //Draws a circle at position (x,y) with radius and colour specified
-const drawCircle = (x = 0, y = 0, rad, colour) => {
+const drawCircle = (x = 0, y = 0, rad, colour = 'black') => {
+    if (x <= 0 || y <= 0 || rad <= 0) return;
     ctx.save();
     ctx.fillStyle = colour;
     ctx.beginPath();
@@ -29,7 +30,7 @@ function drawPose(pose) {
         // left shoulder, right shoulder, right hip, left hip
         drawQuad(pose[5].position, pose[6].position, pose[12].position, pose[11].position, 'black');
 
-        tmPose.drawKeypoints(pose, minPartConfidence, ctx, 5, 'black');
+        //tmPose.drawKeypoints(pose, minPartConfidence, ctx, 5, 'white');
         tmPose.drawSkeleton(pose, minPartConfidence, ctx, 3, 'black');
 
         //draw wrist points
@@ -63,7 +64,7 @@ const fillText = (string, x, y, css, colour) => {
 
 function reset() {
     ctx.save();
-    ctx.globalAlpha = 0.2;
+    ctx.globalAlpha = 0.5;
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     ctx.fill();
