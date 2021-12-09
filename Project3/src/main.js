@@ -29,6 +29,12 @@ const GAMESTATE = Object.freeze({
     END: Symbol("END")
 });
 
+// const FACESTATE = Object.freeze({
+//     SMILE: 'SMILE',
+//     FROWN: 'FROWN',
+//     DEFAULT: 'DEFAULT'
+// })
+
 const enemyDimensions = { width: 100, height: 50 };
 const hitpointRad = 10;
 let state = GAMESTATE.MENU;
@@ -40,6 +46,8 @@ let health = 100;
 let enemySpeed = 150;
 let myPose;
 let images;
+let face;
+let frame;
 
 
 async function init(tmPose, imageData) {
@@ -56,6 +64,8 @@ async function init(tmPose, imageData) {
     setupUI(canvasElement, tmPose);
     canvas.setupCanvas(canvasElement);
     ctx = canvasElement.getContext('2d');
+
+    frame = 0;
 
     //save imageData and create enemies
     images = imageData;
@@ -96,7 +106,7 @@ async function predict() {
 
 async function loop() {
     window.requestAnimationFrame(loop, 1 / fps);
-
+    frame++;
     switch (state) {
         case GAMESTATE.MENU:
 
@@ -106,16 +116,7 @@ async function loop() {
             if (myPose) {
                 canvas.drawHUD(score, health);
 
-                //Draw Player head
-                canvas.drawCircle(hitpoints['head'].x, hitpoints['head'].y, hitpoints['head'].radius, 'black');
-
-                //Draw eyes
-                canvas.drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius, 'white');
-                canvas.drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius - 3, 'black');
-
-                canvas.drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius, 'white');
-                canvas.drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius - 3, 'black');
-
+                canvas.drawFace(hitpoints['head'], eyes, face);
                 //draw the pose
                 canvas.drawPose(myPose);
             }
@@ -141,19 +142,23 @@ async function loop() {
                             if (k == 'wrist1') { //check if its a wrist
                                 score++;
                                 s.isDead = true;
-
+                                face = canvas.FACESTATE.SMILE;
+                                frame = 1;
                                 //set enemy direction to reflect the punch
                                 s.fwd.x = (hitpoints['wrist1'].x - hitpoints['elbow1'].x) / 10;
                                 s.fwd.y = (hitpoints['wrist1'].y - hitpoints['elbow1'].y) / 10;
                             } else if (k == 'wrist2') { //check if its a wrist
                                 score++;
                                 s.isDead = true;
-
+                                face = canvas.FACESTATE.SMILE;
+                                frame = 1;
                                 //set enemy direction to reflect the punch
                                 s.fwd.x = (hitpoints['wrist2'].x - hitpoints['elbow2'].x) / 10;
                                 s.fwd.y = (hitpoints['wrist2'].y - hitpoints['elbow2'].y) / 10;
                             } else {
                                 health -= 10;
+                                face = canvas.FACESTATE.FROWN;
+                                frame = 1;
                                 s.isDead = true;
                                 s.offscreen = true;
                                 if (health < 10) {
@@ -183,6 +188,9 @@ async function loop() {
 
             await predict();
 
+            //every 30 frames, reset the face
+            if (frame % 30 == 0)
+                face = canvas.FACESTATE.DEFAULT;
             canvas.reset();
             break;
         case GAMESTATE.PAUSE:
@@ -193,15 +201,8 @@ async function loop() {
             webcam.update();
             if (myPose) {
                 canvas.drawHUD(score, health);
-                //Draw Player head
-                canvas.drawCircle(hitpoints['head'].x, hitpoints['head'].y, hitpoints['head'].radius, 'black');
-                //Draw eyes
-                canvas.drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius, 'white');
-                canvas.drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius - 3, 'black');
 
-                canvas.drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius, 'white');
-                canvas.drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius - 3, 'black');
-
+                canvas.drawFace(hitpoints['head'], eyes, face);
                 //draw the pose
                 canvas.drawPose(myPose);
             }
@@ -248,10 +249,11 @@ function setupUI(canvasElement, tmPose) {
     //Set the hidden buttons as visible and hide this one
     setupWebcamButton.onclick = e => {
         utils.clearBanner();
-        setupWebcam(tmPose);
-        playButton.style.visibility = "visible";
-        fsButton.style.visibility = "visible";
-        e.target.style.display = "none";
+        if (setupWebcam(tmPose)) {
+            playButton.style.visibility = "visible";
+            fsButton.style.visibility = "visible";
+            e.target.style.display = "none";
+        }
     }
 } // end setupUI
 
@@ -261,9 +263,15 @@ async function setupWebcam(tmPose) {
     if (webcam) return; //check if webcam is already set up
     const flip = true; // whether to flip the webcam
     webcam = new tmPose.Webcam(canvasElement.width, canvasElement.height, flip); // width, height, flip
-    await webcam.setup(); // request access to the webcam
+    try {
+        await webcam.setup(); // request access to the webcam
+    } catch (e) {
+        utils.showBanner('is-danger', "Webcam not set up. Set up webcam before playing");
+        return false;
+    }
     webcam.play();
     window.requestAnimationFrame(loop);
+    //return true;
 }
 
 export { init };

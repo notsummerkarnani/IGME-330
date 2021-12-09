@@ -8,6 +8,12 @@ let ctx, canvasWidth, canvasHeight, gradient;
 
 const minPartConfidence = .5;
 
+const FACESTATE = Object.freeze({
+    SMILE: 'SMILE',
+    FROWN: 'FROWN',
+    DEFAULT: 'DEFAULT'
+})
+
 //Draws a circle at position (x,y) with radius and colour specified
 const drawCircle = (x = 0, y = 0, rad, colour = 'black') => {
     if (x <= 0 || y <= 0 || rad <= 0) return;
@@ -19,6 +25,50 @@ const drawCircle = (x = 0, y = 0, rad, colour = 'black') => {
     ctx.fill();
     ctx.restore();
 }
+
+//draw the head of the player
+//draw the eyes of the player
+//draw mouth of the player (with a switch statement for mouth) 
+function drawFace(head, eyes, face) {
+    //Draw Player head
+    drawCircle(head.x, head.y, head.radius, 'black');
+
+    //Draw eyes
+    drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius, 'white');
+    drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius * .25, 'black');
+
+    drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius, 'white');
+    drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius * .25, 'black');
+
+    switch (face) {
+        case FACESTATE.SMILE:
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(head.x, head.y + head.radius * .25, head.radius * .5, 0, Math.PI, false);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+            break;
+        case FACESTATE.FROWN:
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(head.x, head.y + head.radius * .4, head.radius * .5, Math.PI, Math.PI * 2, false);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+            break;
+        case FACESTATE.DEFAULT:
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(head.x, head.y + head.radius * .25, head.radius * .25, 0, Math.PI * 2, false);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+            break;
+    }
+
+}
+
 
 function drawPose(pose) {
     //ctx.drawImage(webcam.canvas, 0, 0);
@@ -116,4 +166,4 @@ const drawHUD = (score, health) => {
     fillText(`Score: ${score}`, 100, 20, "20pt courier", "black");
     fillText(`Health: ${health}`, canvasWidth - 110, 20, "20pt courier", "black");
 }
-export { setupCanvas, drawPose, reset, fillText, strokeText, drawHUD, drawCircle, drawQuad };
+export { FACESTATE, setupCanvas, drawPose, reset, fillText, strokeText, drawHUD, drawFace, drawCircle, drawQuad };
