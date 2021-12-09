@@ -2,6 +2,7 @@
 // No particular reason, actually, just that it's good for you to get used to this syntax
 // For Project 2 - any code added here MUST also use arrow function syntax
 import Enemy2 from './enemy2.js';
+import Enemy3 from './enemy3.js';
 import ImageSprite from './ImageSprite.js'
 
 const makeColor = (red, green, blue, alpha = 1) => {
@@ -144,7 +145,7 @@ function createEnemy2(image, type, num = 10, speed = 100, width = 50, height = 5
     let sprites = [];
     for (let i = 0; i < num; i++) {
         //create objects on the rignt of the canvas
-        let s = new Enemy2(Math.random() * canvas.width + canvas.width,
+        let s = new Enemy3(Math.random() * canvas.width + canvas.width,
             Math.random() * 0.7 * canvas.height + canvas.height * .15, { x: -Math.random() - .5, y: 0 },
             speed,
             false,

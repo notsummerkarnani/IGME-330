@@ -175,7 +175,7 @@ async function loop() {
                         s.offscreen = true;
                     }
                 }
-                s.move();
+                s.move(1 / fps, hitpoints['head']);
                 // draw sprites
                 s.draw(ctx);
 

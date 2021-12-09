@@ -7,10 +7,11 @@ export default class Enemy2 extends ImageSprite {
         this.angularSpeed = 0;
     }
 
+    //sin
     move(dt = 1 / 60) {
         this.angularSpeed += .1;
 
         this.x += this.fwd.x * this.speed * dt;
-        this.y += Math.sin(this.angularSpeed) * 2
+        this.y += Math.sin(this.angularSpeed) * 5;
     }
 }
