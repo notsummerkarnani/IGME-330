@@ -69,11 +69,14 @@ async function init(tmPose, imageData) {
 
     //save imageData and create enemies
     images = imageData;
-    enemies = utils.createImageSprite(images.ufo, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
+    // enemies = utils.createImageSprite(images.ufo, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
+    //     width: canvasElement.width,
+    //     height: canvasElement.height
+    // });
+    enemies = utils.createEnemy2(images.ufo, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
         width: canvasElement.width,
         height: canvasElement.height
     });
-    //loop();
 }
 
 async function predict() {

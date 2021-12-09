@@ -1,6 +1,7 @@
 // Why are the all of these ES6 Arrow functions instead of regular JS functions?
 // No particular reason, actually, just that it's good for you to get used to this syntax
 // For Project 2 - any code added here MUST also use arrow function syntax
+import Enemy2 from './enemy2.js';
 import ImageSprite from './ImageSprite.js'
 
 const makeColor = (red, green, blue, alpha = 1) => {
@@ -78,6 +79,29 @@ function loadImages(imageSources, callback) {
     }
 }
 
+function loadSounds(soundSources, callback) {
+    let numSounds = Object.keys(soundSources).length;
+    let numLoadedSounds = 0;
+
+    // load sounds
+    console.log("... start loading sounds ...");
+    for (let soundName in soundSources) {
+        console.log("... trying to load '" + soundName + "'");
+        let sound = new Howl({ src: soundSources[soundName] });
+        soundSources[soundName] = sound;
+        sound.onload = function() {
+            console.log("SUCCESS: sound named '" + soundName + "' at " + this.src + " loaded!");
+            if (++numLoadedSounds >= numSounds) {
+                console.log("... done loading sounds ...");
+                callback(soundSources);
+            }
+        }
+        img.onerror = function() {
+            console.log("ERROR: sound named '" + soundName + "' at " + this.src + " did not load!");
+        }
+    }
+}
+
 //returns the distance between two vectors
 const getDistance = (a, b) => {
     let d1 = b.x - a.x;
@@ -114,6 +138,34 @@ function createImageSprite(image, type, num = 10, speed = 100, width = 50, heigh
 
 }
 
+//Creates enemies outside the bounding area of the rect moving towards it
+function createEnemy2(image, type, num = 10, speed = 100, width = 50, height = 50, canvas = { width: 900, height: 400 }) {
+
+    let sprites = [];
+    for (let i = 0; i < num; i++) {
+        //create objects on the rignt of the canvas
+        let s = new Enemy2(Math.random() * canvas.width + canvas.width,
+            Math.random() * 0.7 * canvas.height + canvas.height * .15, { x: -Math.random() - .5, y: 0 },
+            speed,
+            false,
+            width,
+            height,
+            image,
+            type,
+            true);
+
+        //randomly change objects to the left
+        if (Math.random() >= .5) {
+            s.x *= -1;
+            s.x += canvas.width;
+            s.fwd.x *= -1;
+        }
+        sprites.push(s);
+    }
+    return sprites;
+
+}
+
 //param type of banner being shown
 //displays message on the screen
 //note the colour is in bulma colours (eg. is-warning for yellow)
@@ -125,4 +177,4 @@ const clearBanner = () => {
     warningMessage.innerHTML = null;
 }
 
-export { clearBanner, makeColor, getDistance, getRandomColor, getLinearGradient, goFullscreen, getRandomUnitVector, loadImages, createImageSprite, showBanner };
+export { createEnemy2, clearBanner, makeColor, getDistance, getRandomColor, getLinearGradient, goFullscreen, getRandomUnitVector, loadImages, createImageSprite, showBanner };
