@@ -8,8 +8,8 @@ import "https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js"
 
 
 const imageSources = {
-    ufo: '../media/UFO.png',
-    test: '../media/test.png'
+    UFO: '../media/UFO.png',
+    UFO2: '../media/UFO2.png'
 };
 
 const soundSources = {

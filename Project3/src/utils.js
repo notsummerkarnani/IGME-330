@@ -1,8 +1,8 @@
 // Why are the all of these ES6 Arrow functions instead of regular JS functions?
 // No particular reason, actually, just that it's good for you to get used to this syntax
 // For Project 2 - any code added here MUST also use arrow function syntax
-import Enemy2 from './enemy2.js';
-import Enemy3 from './enemy3.js';
+import Enemy2 from './Enemy2.js';
+import Enemy3 from './Enemy3.js';
 import Enemy from './Enemy.js'
 
 const makeColor = (red, green, blue, alpha = 1) => {
@@ -84,7 +84,7 @@ const loadMedia = (imageSources, soundSources, callback) => {
     console.log("... start loading sounds ...");
     for (let soundName in soundSources) {
         console.log("... loading '" + soundName + "'");
-        let sound = new Howl({ src: soundSources[soundName], volume: .3 });
+        let sound = new Howl({ src: soundSources[soundName], volume: .5 });
         if (soundName == 'music') sound._loop = true;
         soundSources[soundName] = sound;
     }

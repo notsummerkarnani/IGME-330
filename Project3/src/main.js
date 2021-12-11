@@ -10,6 +10,7 @@
 import * as utils from './utils.js';
 import * as canvas from './canvas.js';
 import Circle from './circle.js';
+import * as manager from './Manager.js';
 
 
 // More API functions here:
@@ -18,7 +19,7 @@ import Circle from './circle.js';
 // the link to your model provided by Teachable Machine export panel
 const URL = 'https://teachablemachine.withgoogle.com/models/7tEeCg_ln/';
 
-let model, webcam, ctx, fps = 60,
+let model, webcam, fps = 60,
     canvasElement,
     eyes = {};
 
@@ -29,18 +30,13 @@ const GAMESTATE = Object.freeze({
     END: Symbol("END")
 });
 
-
-const enemyDimensions = { width: 100, height: 50 };
 const hitpointRad = 10;
 let state = GAMESTATE.MENU;
 
-let enemies = [];
 let hitpoints = {};
 let score = 0;
 let health = 100;
-let enemySpeed = 150;
 let myPose;
-let images;
 let sounds;
 let face;
 let frame;
@@ -59,21 +55,11 @@ async function init(tmPose, imageData, soundData) {
     canvasElement = document.querySelector("canvas"); // hookup <canvas> element
     setupUI(canvasElement, tmPose);
     canvas.setupCanvas(canvasElement);
-    ctx = canvasElement.getContext('2d');
 
     frame = 0;
 
-    //save imageData and create enemies
-    images = imageData;
-    sounds = soundData;
-    // enemies = utils.createEnemy(images.ufo, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
-    //     width: canvasElement.width,
-    //     height: canvasElement.height
-    // });
-    enemies = utils.createEnemy2(images.test, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
-        width: canvasElement.width,
-        height: canvasElement.height
-    });
+    //save sounds and setup enemies
+    manager.init(imageData, soundData, canvasElement);
 }
 
 async function predict() {
@@ -120,71 +106,7 @@ async function loop() {
                 //draw the pose
                 canvas.drawPose(myPose);
             }
-            //loop through enemies
-            for (let s of enemies) {
-                if (!s.isDead) { // as long as enemy hasnt been hit
-                    //if enemy is onscreen
-                    if (s.offscreen) { //reflect enemy off walls
-                        if (s.x > 0 && s.x < canvasElement.width - s.width / 2) {
-                            s.offscreen = false;
-                        }
-                    } else {
-                        if (s.x < 0 || s.x > canvasElement.width - s.width / 2) {
-                            s.reflectX();
-                        }
-                    }
-
-                    let enemyCircle = s.getCircle();
-
-                    //check collision with hitpoints
-                    for (let k of Object.keys(hitpoints)) {
-                        if (enemyCircle.intersects(hitpoints[k])) {
-                            frame = 1;
-                            s.isDead = true;
-                            if (k == 'wrist1') { //check if its a wrist
-                                sounds['punch'].play();
-                                score++;
-                                face = canvas.FACESTATE.SMILE;
-                                //set enemy direction to reflect the punch
-                                s.fwd.x = (hitpoints['wrist1'].x - hitpoints['elbow1'].x) / 10;
-                                s.fwd.y = (hitpoints['wrist1'].y - hitpoints['elbow1'].y) / 10;
-                            } else if (k == 'wrist2') { //check if its a wrist
-                                sounds['punch'].play();
-                                score++;
-                                face = canvas.FACESTATE.SMILE;
-                                //set enemy direction to reflect the punch
-                                s.fwd.x = (hitpoints['wrist2'].x - hitpoints['elbow2'].x) / 10;
-                                s.fwd.y = (hitpoints['wrist2'].y - hitpoints['elbow2'].y) / 10;
-                            } else {
-                                sounds['hit'].play();
-                                health -= 10;
-                                face = canvas.FACESTATE.FROWN;
-                                s.offscreen = true;
-                                if (health < 10) {
-                                    state = GAMESTATE.END;
-                                }
-                            }
-                        }
-                    }
-                } else { //check if enemy has left the screen and mark off
-                    if (s.x < 0 || s.x > canvasElement.width || s.y < 0 || s.y > canvasElement.height) {
-                        s.offscreen = true;
-                    }
-                }
-                s.move(1 / fps, hitpoints['head']);
-                // draw sprites
-                s.draw(ctx);
-
-            } // end for
-
-            //remove enemies that have been hit and are off screen
-            enemies = enemies.filter(s => !s.offscreen || !s.isDead);
-            //create more enemies
-            if (enemies.length == 0) enemies = utils.createEnemy(images.ufo, Circle, 5, enemySpeed + score, enemyDimensions.width, enemyDimensions.height, {
-                width: canvasElement.width,
-                height: canvasElement.height
-            });
-
+            manager.update(hitpoints);
             await predict();
 
             //every 30 frames, reset the face
@@ -235,12 +157,10 @@ function setupUI(canvasElement, tmPose) {
                 return;
             }
             state = GAMESTATE.GAME;
-            sounds['music'].play();
             playButton.innerText = 'Pause';
         } else {
             state = GAMESTATE.PAUSE;
             playButton.innerText = 'Play';
-            sounds['music'].stop();
             canvas.fillText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "red");
             canvas.strokeText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "black", 2);
         }

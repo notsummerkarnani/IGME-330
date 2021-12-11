@@ -13,9 +13,8 @@ export default class Enemy extends sprite {
     draw(ctx) {
         if (this.offscreen && this.isDead) return;
         ctx.save();
+        if (this.fwd.x < 0) ctx.scale(-1, 1);
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         ctx.restore();
     }
-
-
 }
