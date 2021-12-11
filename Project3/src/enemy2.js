@@ -1,6 +1,6 @@
-import ImageSprite from './ImageSprite.js'
+import Enemy from './Enemy.js'
 
-export default class Enemy2 extends ImageSprite {
+export default class Enemy2 extends Enemy {
     constructor(x, y, fwd, speed, isDead, width, height, image, type, offscreen) {
         super(x, y, fwd, speed, isDead, width, height, image, type, offscreen);
 

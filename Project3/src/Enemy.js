@@ -1,6 +1,6 @@
 import sprite from './sprite.js'
 
-export default class ImageSprite extends sprite {
+export default class Enemy extends sprite {
     constructor(x, y, fwd, speed, isDead, width, height, image, type, offscreen) {
         super(x, y, fwd, speed, isDead);
         this.width = width;

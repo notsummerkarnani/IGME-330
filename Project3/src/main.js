@@ -29,11 +29,6 @@ const GAMESTATE = Object.freeze({
     END: Symbol("END")
 });
 
-// const FACESTATE = Object.freeze({
-//     SMILE: 'SMILE',
-//     FROWN: 'FROWN',
-//     DEFAULT: 'DEFAULT'
-// })
 
 const enemyDimensions = { width: 100, height: 50 };
 const hitpointRad = 10;
@@ -46,12 +41,13 @@ let health = 100;
 let enemySpeed = 150;
 let myPose;
 let images;
+let sounds;
 let face;
 let frame;
 
 
-async function init(tmPose, imageData) {
-
+async function init(tmPose, imageData, soundData) {
+    //console.log('init called');
     const modelURL = URL + 'model.json';
     const metadataURL = URL + 'metadata.json';
 
@@ -69,11 +65,12 @@ async function init(tmPose, imageData) {
 
     //save imageData and create enemies
     images = imageData;
-    // enemies = utils.createImageSprite(images.ufo, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
+    sounds = soundData;
+    // enemies = utils.createEnemy(images.ufo, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
     //     width: canvasElement.width,
     //     height: canvasElement.height
     // });
-    enemies = utils.createEnemy2(images.ufo, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
+    enemies = utils.createEnemy2(images.test, Circle, 5, enemySpeed, enemyDimensions.width, enemyDimensions.height, {
         width: canvasElement.width,
         height: canvasElement.height
     });
@@ -142,27 +139,26 @@ async function loop() {
                     //check collision with hitpoints
                     for (let k of Object.keys(hitpoints)) {
                         if (enemyCircle.intersects(hitpoints[k])) {
+                            frame = 1;
+                            s.isDead = true;
                             if (k == 'wrist1') { //check if its a wrist
+                                sounds['punch'].play();
                                 score++;
-                                s.isDead = true;
                                 face = canvas.FACESTATE.SMILE;
-                                frame = 1;
                                 //set enemy direction to reflect the punch
                                 s.fwd.x = (hitpoints['wrist1'].x - hitpoints['elbow1'].x) / 10;
                                 s.fwd.y = (hitpoints['wrist1'].y - hitpoints['elbow1'].y) / 10;
                             } else if (k == 'wrist2') { //check if its a wrist
+                                sounds['punch'].play();
                                 score++;
-                                s.isDead = true;
                                 face = canvas.FACESTATE.SMILE;
-                                frame = 1;
                                 //set enemy direction to reflect the punch
                                 s.fwd.x = (hitpoints['wrist2'].x - hitpoints['elbow2'].x) / 10;
                                 s.fwd.y = (hitpoints['wrist2'].y - hitpoints['elbow2'].y) / 10;
                             } else {
+                                sounds['hit'].play();
                                 health -= 10;
                                 face = canvas.FACESTATE.FROWN;
-                                frame = 1;
-                                s.isDead = true;
                                 s.offscreen = true;
                                 if (health < 10) {
                                     state = GAMESTATE.END;
@@ -184,7 +180,7 @@ async function loop() {
             //remove enemies that have been hit and are off screen
             enemies = enemies.filter(s => !s.offscreen || !s.isDead);
             //create more enemies
-            if (enemies.length == 0) enemies = utils.createImageSprite(images.ufo, Circle, 5, enemySpeed + score, enemyDimensions.width, enemyDimensions.height, {
+            if (enemies.length == 0) enemies = utils.createEnemy(images.ufo, Circle, 5, enemySpeed + score, enemyDimensions.width, enemyDimensions.height, {
                 width: canvasElement.width,
                 height: canvasElement.height
             });
@@ -209,8 +205,8 @@ async function loop() {
                 //draw the pose
                 canvas.drawPose(myPose);
             }
-            canvas.fillText("You suck", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt 'Press Start 2P', cursive", "red");
-            canvas.strokeText("You suck", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt 'Press Start 2P', cursive", "black", 2);
+            canvas.fillText("Do Better", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt 'Press Start 2P', cursive", "red");
+            canvas.strokeText("Do Better", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt 'Press Start 2P', cursive", "black", 2);
 
             await predict();
             canvas.reset();
@@ -239,10 +235,12 @@ function setupUI(canvasElement, tmPose) {
                 return;
             }
             state = GAMESTATE.GAME;
+            sounds['music'].play();
             playButton.innerText = 'Pause';
         } else {
             state = GAMESTATE.PAUSE;
             playButton.innerText = 'Play';
+            sounds['music'].stop();
             canvas.fillText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "red");
             canvas.strokeText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "black", 2);
         }

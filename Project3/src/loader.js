@@ -1,5 +1,5 @@
 import * as main from "./main.js";
-import { loadImages } from './utils.js';
+import { loadMedia } from './utils.js';
 
 //import web components
 import '../components/my-footer.js';
@@ -8,12 +8,17 @@ import "https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js"
 
 
 const imageSources = {
-    ufo: './media/UFO.png',
+    ufo: '../media/UFO.png',
+    test: '../media/test.png'
 };
 
 const soundSources = {
+    music: '../media/bckgr.wav',
+    punch: '../media/punch.wav',
+    hit: '../media/hit.mp3',
+    heal: '../media/heal.flac'
+};
 
-}
-
-// loadImages(imageSourcesObject,callback);
-loadImages(imageSources, (imageData) => { main.init(tmPose, imageData) });
+loadMedia(imageSources, soundSources, () => {
+    main.init(tmPose, imageSources, soundSources);
+});
