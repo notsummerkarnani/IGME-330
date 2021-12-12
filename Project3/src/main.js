@@ -34,12 +34,8 @@ const hitpointRad = 10;
 let state = GAMESTATE.MENU;
 
 let hitpoints = {};
-let score = 0;
-let health = 100;
 let myPose;
 let sounds;
-let face;
-let frame;
 
 
 async function init(tmPose, imageData, soundData) {
@@ -55,8 +51,6 @@ async function init(tmPose, imageData, soundData) {
     canvasElement = document.querySelector("canvas"); // hookup <canvas> element
     setupUI(canvasElement, tmPose);
     canvas.setupCanvas(canvasElement);
-
-    frame = 0;
 
     //save sounds and setup enemies
     manager.init(imageData, soundData, canvasElement);
@@ -92,7 +86,6 @@ async function predict() {
 
 async function loop() {
     window.requestAnimationFrame(loop, 1 / fps);
-    frame++;
     switch (state) {
         case GAMESTATE.MENU:
 
@@ -100,18 +93,19 @@ async function loop() {
         case GAMESTATE.GAME:
             webcam.update(); // update the webcam frame
             if (myPose) {
-                canvas.drawHUD(score, health);
-
-                canvas.drawFace(hitpoints['head'], eyes, face);
+                canvas.drawFace(hitpoints['head'], eyes, manager.face);
                 //draw the pose
                 canvas.drawPose(myPose);
             }
+
+            //update enemy collisions and movement
             manager.update(hitpoints);
+
+            if (manager.getHealth() < 10) {
+                state = GAMESTATE.END;
+            }
             await predict();
 
-            //every 30 frames, reset the face
-            if (frame % 30 == 0)
-                face = canvas.FACESTATE.DEFAULT;
             canvas.reset();
             break;
         case GAMESTATE.PAUSE:
@@ -121,9 +115,9 @@ async function loop() {
             canvas.reset();
             webcam.update();
             if (myPose) {
-                canvas.drawHUD(score, health);
+                //canvas.drawHUD(score, health);
 
-                canvas.drawFace(hitpoints['head'], eyes, face);
+                canvas.drawFace(hitpoints['head'], eyes, manager.face);
                 //draw the pose
                 canvas.drawPose(myPose);
             }

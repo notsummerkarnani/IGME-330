@@ -1,4 +1,5 @@
 import Circle from "./circle.js";
+import { drawHUD, FACESTATE } from "./canvas.js";
 import * as utils from "./utils.js";
 import "./sprite.js"
 
@@ -11,7 +12,12 @@ let round,
     canvas,
     ctx,
     enemies,
-    fps;
+    fps,
+    frame,
+    score,
+    health,
+    face,
+    gradingMode;
 
 
 const init = (imageData, soundData, canvasElement) => {
@@ -19,6 +25,10 @@ const init = (imageData, soundData, canvasElement) => {
     enemySpeed = 150;
     enemies = []
     fps = 1 / 60; //not really fps but 1/fps
+    score = 0;
+    health = 100;
+    frame = 0;
+    gradingMode = true;
 
     images = imageData;
     sounds = soundData;
@@ -50,6 +60,8 @@ const loadLevel = () => {
 }
 
 const update = (hitpoints) => {
+    console.log(enemies);
+    frame++;
     //loop through enemies
     for (let s of enemies) {
         if (!s.isDead) { // as long as enemy hasnt been hit
@@ -69,30 +81,28 @@ const update = (hitpoints) => {
             //check collision with hitpoints
             for (let k of Object.keys(hitpoints)) {
                 if (enemyCircle.intersects(hitpoints[k])) {
-                    //frame = 1;
+                    frame = 1;
                     s.isDead = true;
                     if (k == 'wrist1') { //check if its a wrist
                         sounds['punch'].play();
-                        //score++;
-                        //face = canvas.FACESTATE.SMILE;
+                        score++;
+                        face = FACESTATE.SMILE;
                         //set enemy direction to reflect the punch
                         s.fwd.x = (hitpoints['wrist1'].x - hitpoints['elbow1'].x) / 10;
                         s.fwd.y = (hitpoints['wrist1'].y - hitpoints['elbow1'].y) / 10;
                     } else if (k == 'wrist2') { //check if its a wrist
                         sounds['punch'].play();
-                        //score++;
-                        //face = canvas.FACESTATE.SMILE;
+                        score++;
+                        face = FACESTATE.SMILE;
                         //set enemy direction to reflect the punch
                         s.fwd.x = (hitpoints['wrist2'].x - hitpoints['elbow2'].x) / 10;
                         s.fwd.y = (hitpoints['wrist2'].y - hitpoints['elbow2'].y) / 10;
                     } else {
                         sounds['hit'].play();
-                        //health -= 10;
-                        //face = canvas.FACESTATE.FROWN;
+                        if (!gradingMode) health -= 10;
+                        face = FACESTATE.FROWN;
                         s.offscreen = true;
-                        // if (health < 10) {
-                        //     state = GAMESTATE.END;
-                        // }
+
                     }
                 }
             }
@@ -112,6 +122,14 @@ const update = (hitpoints) => {
     //create more enemies
     if (enemies.length == 0) loadLevel();
 
+    //every 30 frames, reset the face
+    if (frame % 30 == 0) face = FACESTATE.DEFAULT;
+
+    drawHUD(score, health);
 }
 
-export { init, loadLevel, update }
+const getHealth = () => {
+    return health;
+}
+
+export { init, loadLevel, update, getHealth, face }

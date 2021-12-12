@@ -84,8 +84,11 @@ const loadMedia = (imageSources, soundSources, callback) => {
     console.log("... start loading sounds ...");
     for (let soundName in soundSources) {
         console.log("... loading '" + soundName + "'");
-        let sound = new Howl({ src: soundSources[soundName], volume: .5 });
-        if (soundName == 'music') sound._loop = true;
+        let sound = new Howl({ src: soundSources[soundName] });
+        if (soundName == 'music') {
+            sound._loop = true;
+            sound._volume = 0.5;
+        };
         soundSources[soundName] = sound;
     }
     console.log("... done loading sounds ...");
@@ -120,6 +123,8 @@ function createEnemy(image, type, num = 10, speed = 100, width = 50, height = 50
             s.x *= -1;
             s.x += canvas.width;
             s.fwd.x *= -1;
+        } else {
+            console.log('RIGHT');
         }
         sprites.push(s);
     }
@@ -132,9 +137,11 @@ function createEnemy2(image, type, num = 10, speed = 100, width = 50, height = 5
 
     let sprites = [];
     for (let i = 0; i < num; i++) {
+        let rand = Math.random();
+
         //create objects on the rignt of the canvas
-        let s = new Enemy3(Math.random() * canvas.width + canvas.width,
-            Math.random() * 0.7 * canvas.height + canvas.height * .15, { x: -Math.random() - .5, y: 0 },
+        let s = new Enemy3(rand * canvas.width + canvas.width,
+            rand * 0.7 * canvas.height + canvas.height * .15, { x: -rand - .5, y: 0 },
             speed,
             false,
             width,
@@ -144,10 +151,12 @@ function createEnemy2(image, type, num = 10, speed = 100, width = 50, height = 5
             true);
 
         //randomly change objects to the left
-        if (Math.random() >= .5) {
+        if (rand >= .5) {
             s.x *= -1;
             s.x += canvas.width;
             s.fwd.x *= -1;
+        } else {
+            console.log('RIGHT');
         }
         sprites.push(s);
     }
