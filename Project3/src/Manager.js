@@ -41,17 +41,17 @@ const init = (imageData, soundData, canvasElement) => {
 const loadLevel = () => {
     round++;
 
-    let baseEnemies = utils.createEnemy(images.UFO, Circle, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+    let baseEnemies = utils.createEnemy(images.ufo, Circle, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
         width: canvas.width,
         height: canvas.height
     });
 
-    let enemies2 = utils.createEnemy(images.UFO2, Circle, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+    let enemies2 = utils.createEnemy(images.ufo, Circle, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
         width: canvas.width,
         height: canvas.height
     });
 
-    let enemies3 = utils.createEnemy(images.UFO, Circle, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+    let enemies3 = utils.createEnemy(images.ufo, Circle, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
         width: canvas.width,
         height: canvas.height
     });

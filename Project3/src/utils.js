@@ -56,44 +56,6 @@ const getRandomUnitVector = () => {
     return { x: x, y: y };
 }
 
-const loadMedia = (imageSources, soundSources, callback) => {
-    let numImages = Object.keys(imageSources).length;
-    let numLoadedImages = 0;
-
-    // load images
-    console.log("... start loading images ...");
-    for (let imageName in imageSources) {
-        console.log("... trying to load '" + imageName + "'");
-        let img = new Image();
-        img.src = imageSources[imageName];
-        imageSources[imageName] = img;
-        img.onload = function() {
-            console.log("SUCCESS: Image named '" + imageName + "' at " + this.src + " loaded!");
-            ++numLoadedImages;
-            if (numLoadedImages >= numImages) {
-                console.log("... done loading images ...");
-                callback(imageSources);
-            }
-        }
-        img.onerror = function() {
-            console.log("ERROR: image named '" + imageName + "' at " + this.src + " did not load!");
-        }
-    }
-
-    // load sounds
-    console.log("... start loading sounds ...");
-    for (let soundName in soundSources) {
-        console.log("... loading '" + soundName + "'");
-        let sound = new Howl({ src: soundSources[soundName] });
-        if (soundName == 'music') {
-            sound._loop = true;
-            sound._volume = 0.5;
-        };
-        soundSources[soundName] = sound;
-    }
-    console.log("... done loading sounds ...");
-}
-
 //returns the distance between two vectors
 const getDistance = (a, b) => {
     let d1 = b.x - a.x;
@@ -175,4 +137,4 @@ const clearBanner = () => {
     warningMessage.innerHTML = null;
 }
 
-export { createEnemy2, clearBanner, makeColor, getDistance, getRandomColor, getLinearGradient, goFullscreen, getRandomUnitVector, loadMedia, createEnemy, showBanner };
+export { createEnemy2, clearBanner, makeColor, getDistance, getRandomColor, getLinearGradient, goFullscreen, getRandomUnitVector, createEnemy, showBanner };
