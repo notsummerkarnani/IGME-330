@@ -1,7 +1,7 @@
 const template = document.createElement("template");
 template.innerHTML = `
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-<div class="container has-text-centered subtitle">
+<div class="section has-text-centered subtitle">
     <div class="has-background-grey-dark has-text-white-ter py-6" id="footer-output">
         &copy; 2021 PlaceholderTitle || PlaceholderName || @PlaceholderEmail
     </div>

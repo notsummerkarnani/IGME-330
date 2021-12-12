@@ -1,10 +1,14 @@
 {
     "images": [{
             "name": "ufo",
-            "src": "../media/ufo.png"
+            "src": "../media/airship.png"
         },
         {
             "name": "ufo2",
+            "src": "../media/ufo.png"
+        },
+        {
+            "name": "ufo3",
             "src": "../media/ufo2.png"
         }
     ],

@@ -143,14 +143,12 @@ function setupCanvas(canvasElement) {
     // Draw Text
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    fillText("Welcome to", canvasWidth / 2, canvasHeight / 2 - 110, "40pt 'Press Start 2P', cursive", "red");
-    strokeText("Welcome to", canvasWidth / 2, canvasHeight / 2 - 110, "40pt 'Press Start 2P', cursive", "black", 2);
-    fillText("Shadow Boxer", canvasWidth / 2, canvasHeight / 2 - 40, "74pt 'Press Start 2P', cursive", "red");
-    strokeText("Shadow Boxer", canvasWidth / 2, canvasHeight / 2 - 40, "74pt 'Press Start 2P', cursive", "black", 2);
-    fillText("Press 'Play' to start!", canvasWidth / 2, canvasHeight / 2 + 30, "40pt 'Press Start 2P', cursive", "red");
-    strokeText("Press 'Play' to start!", canvasWidth / 2, canvasHeight / 2 + 30, "40pt 'Press Start 2P', cursive", "black", 2);
-    fillText("Make sure your whole upper body is in frame", canvasWidth / 2, canvasHeight / 2 + 80, "25pt 'Press Start 2P', cursive", "red");
-    strokeText("Make sure your whole upper body is in frame", canvasWidth / 2, canvasHeight / 2 + 80, "25pt 'Press Start 2P', cursive", "black", 2);
+    fillText("Welcome to", canvasWidth / 2, canvasHeight / 2 - 110, "40pt Play, sans-serif", "red");
+    strokeText("Welcome to", canvasWidth / 2, canvasHeight / 2 - 110, "40pt Play, sans-serif", "black", 2);
+    fillText("Shadow Boxer", canvasWidth / 2, canvasHeight / 2 - 40, "74pt Play, sans-serif", "red");
+    strokeText("Shadow Boxer", canvasWidth / 2, canvasHeight / 2 - 40, "74pt Play, sans-serif", "black", 2);
+    fillText("Press 'Setup Webcam' to begin!", canvasWidth / 2, canvasHeight / 2 + 30, "40pt Play, sans-serif", "red");
+    strokeText("Press 'Setup Webcam' to begin!", canvasWidth / 2, canvasHeight / 2 + 30, "40pt Play, sans-serif", "black", 2);
 }
 
 const strokeText = (string, x, y, css, colour, lineWidth) => {

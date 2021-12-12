@@ -35,7 +35,6 @@ let state = GAMESTATE.MENU;
 
 let hitpoints = {};
 let myPose;
-let sounds;
 
 
 async function init(tmPose, imageData, soundData) {
@@ -88,7 +87,22 @@ async function loop() {
     window.requestAnimationFrame(loop, 1 / fps);
     switch (state) {
         case GAMESTATE.MENU:
+            webcam.update();
+            if (myPose) {
+                canvas.drawFace(hitpoints['head'], eyes, manager.face);
+                //draw the pose
+                canvas.drawPose(myPose);
+            }
+            canvas.fillText("Ensure that your whole", canvasElement.width / 2, canvasElement.height / 2 - 120, "44pt Play, sans-serif", "red");
+            canvas.strokeText("Ensure that your whole", canvasElement.width / 2, canvasElement.height / 2 - 120, "44pt Play, sans-serif", "black", 2);
+            canvas.fillText("Upper body is in frame", canvasElement.width / 2, canvasElement.height / 2 - 70, "44pt Play, sans-serif", "red");
+            canvas.strokeText("Upper body is in frame", canvasElement.width / 2, canvasElement.height / 2 - 70, "44pt Play, sans-serif", "black", 2);
 
+            canvas.fillText("Press 'Play to start!", canvasElement.width / 2, canvasElement.height / 2 + 10, "50pt Play, sans-serif", "red");
+            canvas.strokeText("Press 'Play to start!", canvasElement.width / 2, canvasElement.height / 2 + 10, "50pt Play, sans-serif", "black", 2);
+
+            await predict();
+            canvas.reset();
             break;
         case GAMESTATE.GAME:
             webcam.update(); // update the webcam frame
@@ -103,6 +117,7 @@ async function loop() {
 
             if (manager.getHealth() < 10) {
                 state = GAMESTATE.END;
+                playButton.innerText = 'Restart';
             }
             await predict();
 
@@ -121,8 +136,8 @@ async function loop() {
                 //draw the pose
                 canvas.drawPose(myPose);
             }
-            canvas.fillText("Do Better", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt 'Press Start 2P', cursive", "red");
-            canvas.strokeText("Do Better", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt 'Press Start 2P', cursive", "black", 2);
+            canvas.fillText("Do Better", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt Play, sans-serif", "red");
+            canvas.strokeText("Do Better", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt Play, sans-serif", "black", 2);
 
             await predict();
             canvas.reset();
@@ -144,19 +159,33 @@ function setupUI(canvasElement, tmPose) {
     };
 
     playButton.onclick = e => {
-        if (state != GAMESTATE.GAME) {
-            //check if webcam is set up, if not show error
-            if (!webcam) {
-                utils.showBanner('is-danger', "Webcam not set up. Set up webcam before playing");
-                return;
-            }
-            state = GAMESTATE.GAME;
-            playButton.innerText = 'Pause';
-        } else {
-            state = GAMESTATE.PAUSE;
-            playButton.innerText = 'Play';
-            canvas.fillText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "red");
-            canvas.strokeText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt 'Press Start 2P', cursive", "black", 2);
+        switch (state) {
+            case GAMESTATE.MENU:
+                //check if webcam is set up, if not show error
+                if (!webcam) {
+                    utils.showBanner('is-danger', "Webcam not set up. Set up webcam before playing");
+                    return;
+                }
+                state = GAMESTATE.GAME;
+                playButton.innerText = 'Pause';
+                break;
+            case GAMESTATE.GAME:
+                state = GAMESTATE.PAUSE;
+                playButton.innerText = 'Play';
+                canvas.fillText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt Play, sans-serif", "red");
+                canvas.strokeText("Game Paused", canvasElement.width / 2, canvasElement.height / 2 - 20, "40pt Play, sans-serif", "black", 2);
+                break;
+            case GAMESTATE.PAUSE:
+                state = GAMESTATE.GAME;
+                playButton.innerText = 'Pause';
+                break;
+            case GAMESTATE.END:
+                manager.reset();
+                state = GAMESTATE.GAME;
+                playButton.innerText = 'Pause';
+                break;
+            default:
+                break;
         }
     }
 

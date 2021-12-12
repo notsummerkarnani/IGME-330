@@ -3,6 +3,10 @@ import { drawHUD, FACESTATE } from "./canvas.js";
 import * as utils from "./utils.js";
 import "./sprite.js"
 
+import Enemy from "./Enemy.js";
+import Enemy2 from "./Enemy2.js";
+import Enemy3 from "./Enemy3.js";
+
 const DIMENSIONS = { width: 100, height: 50 };
 
 let round,
@@ -28,7 +32,7 @@ const init = (imageData, soundData, canvasElement) => {
     score = 0;
     health = 100;
     frame = 0;
-    gradingMode = true;
+    gradingMode = false;
 
     images = imageData;
     sounds = soundData;
@@ -41,17 +45,17 @@ const init = (imageData, soundData, canvasElement) => {
 const loadLevel = () => {
     round++;
 
-    let baseEnemies = utils.createEnemy(images.ufo, Circle, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+    let baseEnemies = utils.createEnemy(images.ufo, Enemy, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
         width: canvas.width,
         height: canvas.height
     });
 
-    let enemies2 = utils.createEnemy(images.ufo, Circle, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+    let enemies2 = utils.createEnemy(images.ufo2, Enemy2, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
         width: canvas.width,
         height: canvas.height
     });
 
-    let enemies3 = utils.createEnemy(images.ufo, Circle, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+    let enemies3 = utils.createEnemy(images.ufo3, Enemy3, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
         width: canvas.width,
         height: canvas.height
     });
@@ -60,7 +64,6 @@ const loadLevel = () => {
 }
 
 const update = (hitpoints) => {
-    console.log(enemies);
     frame++;
     //loop through enemies
     for (let s of enemies) {
@@ -132,4 +135,9 @@ const getHealth = () => {
     return health;
 }
 
-export { init, loadLevel, update, getHealth, face }
+const reset = () => {
+    init(images, sounds, canvas);
+    loadLevel();
+}
+
+export { init, loadLevel, update, getHealth, reset, face }
