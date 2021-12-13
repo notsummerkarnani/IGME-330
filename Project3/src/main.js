@@ -21,6 +21,10 @@ const URL = 'https://teachablemachine.withgoogle.com/models/7tEeCg_ln/';
 
 let model, webcam, fps = 60,
     canvasElement,
+    secondaryCanvas,
+    ctx2,
+    canvas1to2,
+    finalScore,
     eyes = {};
 
 const GAMESTATE = Object.freeze({
@@ -46,8 +50,13 @@ async function init(tmPose, imageData, soundData) {
     // Refer to tmPose.loadFromFiles() in the API to support files from a file picker
     model = await tmPose.load(modelURL, metadataURL);
 
+
     // append/get elements to the DOM
-    canvasElement = document.querySelector("canvas"); // hookup <canvas> element
+    let canvases = document.querySelectorAll("canvas");
+    canvasElement = canvases[0]; // hookup main <canvas> element
+    secondaryCanvas = canvases[1]; //second canvas to display webcam data
+    ctx2 = secondaryCanvas.getContext("2d");
+    canvas1to2 = secondaryCanvas.width / canvasElement.width;
     setupUI(canvasElement, tmPose);
     canvas.setupCanvas(canvasElement);
 
@@ -85,9 +94,15 @@ async function predict() {
 
 async function loop() {
     window.requestAnimationFrame(loop, 1 / fps);
+    webcam.update();
+
+    //draw webcam data on second canvas
+    ctx2.save();
+    ctx2.drawImage(webcam.canvas, 0, 0, canvasElement.width, canvasElement.height, 0, 0, secondaryCanvas.width, secondaryCanvas.height);
+    ctx2.restore();
+
     switch (state) {
         case GAMESTATE.MENU:
-            webcam.update();
             if (myPose) {
                 canvas.drawFace(hitpoints['head'], eyes, manager.face);
                 //draw the pose
@@ -105,7 +120,7 @@ async function loop() {
             canvas.reset();
             break;
         case GAMESTATE.GAME:
-            webcam.update(); // update the webcam frame
+            // update the webcam frame
             if (myPose) {
                 canvas.drawFace(hitpoints['head'], eyes, manager.face);
                 //draw the pose
@@ -115,9 +130,11 @@ async function loop() {
             //update enemy collisions and movement
             manager.update(hitpoints);
 
+
             if (manager.getHealth() < 10) {
                 state = GAMESTATE.END;
                 playButton.innerText = 'Restart';
+                finalScore = manager.getScore();
             }
             await predict();
 
@@ -128,7 +145,7 @@ async function loop() {
             break;
         case GAMESTATE.END:
             canvas.reset();
-            webcam.update();
+
             if (myPose) {
                 //canvas.drawHUD(score, health);
 
@@ -136,8 +153,11 @@ async function loop() {
                 //draw the pose
                 canvas.drawPose(myPose);
             }
-            canvas.fillText("Do Better", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt Play, sans-serif", "red");
-            canvas.strokeText("Do Better", canvasElement.width / 2, canvasElement.height / 2 - 40, "74pt Play, sans-serif", "black", 2);
+            canvas.fillText("Final Score: " + finalScore, canvasElement.width / 2, canvasElement.height / 2 - 80, "74pt Play, sans-serif", "red");
+            canvas.strokeText("Final Score: " + finalScore, canvasElement.width / 2, canvasElement.height / 2 - 80, "74pt Play, sans-serif", "black", 2);
+
+            canvas.fillText("Do Better", canvasElement.width / 2, canvasElement.height / 2 + 20, "74pt Play, sans-serif", "red");
+            canvas.strokeText("Do Better", canvasElement.width / 2, canvasElement.height / 2 + 20, "74pt Play, sans-serif", "black", 2);
 
             await predict();
             canvas.reset();
@@ -148,24 +168,21 @@ async function loop() {
 //Set up the UI elemeents
 function setupUI(canvasElement, tmPose) {
 
-    //hide buttons until webcam is set up
-    playButton.style.visibility = "hidden";
-    fsButton.style.visibility = "hidden";
+    secondaryCanvas.style.visibility = "hidden"
 
-    // add .onclick event to button
-    fsButton.onclick = e => {
-        console.log("init called");
-        utils.goFullscreen(canvasElement);
-    };
+    //hide buttons until webcam is set up
+    setupWebcamButton.classList += " is-primary";
+    playButton.classList += " is-danger";
 
     playButton.onclick = e => {
+        //check if webcam is set up, if not show error
+        if (!webcam) {
+            utils.showBanner('is-danger', "Webcam not set up. Set up webcam before playing");
+            return;
+        }
+
         switch (state) {
             case GAMESTATE.MENU:
-                //check if webcam is set up, if not show error
-                if (!webcam) {
-                    utils.showBanner('is-danger', "Webcam not set up. Set up webcam before playing");
-                    return;
-                }
                 state = GAMESTATE.GAME;
                 playButton.innerText = 'Pause';
                 break;
@@ -190,12 +207,13 @@ function setupUI(canvasElement, tmPose) {
     }
 
     //clear any warning banners if they exist and set up the webcam
-    //Set the hidden buttons as visible and hide this one
+    //change button colours and hide this one
     setupWebcamButton.onclick = e => {
         utils.clearBanner();
         if (setupWebcam(tmPose)) {
-            playButton.style.visibility = "visible";
-            fsButton.style.visibility = "visible";
+            secondaryCanvas.style.visibility = 'visible';
+            playButton.classList.toggle('is-danger');
+            playButton.classList.toggle('is-warning');
             e.target.style.display = "none";
         }
     }
@@ -214,8 +232,9 @@ async function setupWebcam(tmPose) {
         return false;
     }
     webcam.play();
+    playButton.classList.toggle('is-warning');
+    playButton.classList.toggle('is-primary');
     window.requestAnimationFrame(loop);
-    //return true;
 }
 
 export { init };

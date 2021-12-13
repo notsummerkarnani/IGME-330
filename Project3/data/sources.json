@@ -1,32 +1,32 @@
 {
     "images": [{
             "name": "ufo",
-            "src": "../media/airship.png"
+            "src": "./media/airship.png"
         },
         {
             "name": "ufo2",
-            "src": "../media/ufo.png"
+            "src": "./media/ufo.png"
         },
         {
             "name": "ufo3",
-            "src": "../media/ufo2.png"
+            "src": "./media/ufo2.png"
         }
     ],
     "sounds": [{
             "name": "music",
-            "src": "../media/bckgr.wav"
+            "src": "./media/bckgr.wav"
         },
         {
             "name": "punch",
-            "src": "../media/punch.wav"
+            "src": "./media/punch.wav"
         },
         {
             "name": "hit",
-            "src": "../media/hit.mp3"
+            "src": "./media/hit.mp3"
         },
         {
             "name": "heal",
-            "src": "../media/heal.flac"
+            "src": "./media/heal.flac"
         }
     ]
 }

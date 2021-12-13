@@ -27,19 +27,6 @@ const getLinearGradient = (ctx, startX, startY, endX, endY, colorStops) => {
     return lg;
 };
 
-const goFullscreen = (element) => {
-    if (element.requestFullscreen) {
-        element.requestFullscreen();
-    } else if (element.mozRequestFullscreen) {
-        element.mozRequestFullscreen();
-    } else if (element.mozRequestFullScreen) { // camel-cased 'S' was changed to 's' in spec
-        element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-    }
-    // .. and do nothing if the method is not supported
-};
-
 const getRandomUnitVector = () => {
     let x = getRandom(-1, 1);
     let y = getRandom(-1, 1);
@@ -85,40 +72,6 @@ function createEnemy(image, enemyType, num = 10, speed = 100, width = 50, height
             s.x *= -1;
             s.x += canvas.width;
             s.fwd.x *= -1;
-        } else {
-            console.log('RIGHT');
-        }
-        sprites.push(s);
-    }
-    return sprites;
-
-}
-
-//Creates enemies outside the bounding area of the rect moving towards it
-function createEnemy2(image, type, num = 10, speed = 100, width = 50, height = 50, canvas = { width: 900, height: 400 }) {
-
-    let sprites = [];
-    for (let i = 0; i < num; i++) {
-        let rand = Math.random();
-
-        //create objects on the rignt of the canvas
-        let s = new Enemy3(rand * canvas.width + canvas.width,
-            rand * 0.7 * canvas.height + canvas.height * .15, { x: -rand - .5, y: 0 },
-            speed,
-            false,
-            width,
-            height,
-            image,
-            type,
-            true);
-
-        //randomly change objects to the left
-        if (rand >= .5) {
-            s.x *= -1;
-            s.x += canvas.width;
-            s.fwd.x *= -1;
-        } else {
-            console.log('RIGHT');
         }
         sprites.push(s);
     }
@@ -130,11 +83,13 @@ function createEnemy2(image, type, num = 10, speed = 100, width = 50, height = 5
 //displays message on the screen
 //note the colour is in bulma colours (eg. is-warning for yellow)
 const showBanner = (colour, message) => {
-    warningMessage.innerHTML = `<div class="container notification title ${colour}">${message}</div>`;
+    let banner = warningMessage.appendChild(document.createElement('my-banner'));
+    banner.setAttribute('data-text', message);
+    banner.setAttribute('data-colour', colour);
 }
 
 const clearBanner = () => {
     warningMessage.innerHTML = null;
 }
 
-export { createEnemy2, clearBanner, makeColor, getDistance, getRandomColor, getLinearGradient, goFullscreen, getRandomUnitVector, createEnemy, showBanner };
+export { clearBanner, makeColor, getDistance, getRandomColor, getLinearGradient, getRandomUnitVector, createEnemy, showBanner };

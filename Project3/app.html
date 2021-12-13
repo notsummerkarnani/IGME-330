@@ -16,8 +16,13 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/media/favicon_io/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/media/favicon_io/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/media/favicon_io/favicon-16x16.png">
-    <link rel="manifest" href="/media/favicon_io//site.webmanifest">
     <!-- END FAVICON -->
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Play&display=swap" rel="stylesheet">
+    <!-- end Font -->
 
 </head>
 
@@ -25,14 +30,15 @@
     <my-nav data-page="app"></my-nav>
     <main>
         <div id="warningMessage"></div>
-        <canvas width="800" height="400"></canvas>
-        <div id='label-container'></div>
-        <div id="controls">
-            <section>
-                <button class="button" id="setupWebcamButton">Setup Webcam</button>
-                <button class="button" id="playButton">Play</button>
-                <button class="button" id="fsButton">Full Screen</button>
-            </section>
+        <div class='container'>
+            <canvas width="800" height="400"></canvas>
+            <canvas width="200" height="100" id="secondCanvas"></canvas>
+            <div id="controls">
+                <section>
+                    <button class="button" id="setupWebcamButton">Setup Webcam</button>
+                    <button class="button" id="playButton">Play</button>
+                </section>
+            </div>
         </div>
     </main>
     <my-footer></my-footer>

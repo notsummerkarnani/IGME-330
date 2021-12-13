@@ -10,14 +10,25 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer"
     />
+    <link rel="stylesheet" href="styles/default-styles.css">
+
+    <!-- FAVICON -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/media/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/media/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/media/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="/media/favicon_io/site.webmanifest">
+    <!-- END FAVICON -->
+
+    <!-- Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Freckle+Face&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/default-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Play&display=swap" rel="stylesheet">
+    <!-- end Font -->
 </head>
 
 <body>
     <my-nav data-page="home"></my-nav>
+    <my-banner data-text="Welcome to the home page! You can get rid of me by clicking the X ----->"></my-banner>
     <main>
         <div class="section">
             <div class="section has-background-primary">
@@ -27,18 +38,19 @@
                         <p class="subtitle">A boxing game that uses the webcam for input!</p>
                     </div>
                     <div class="column is-one-third">
-                        <img class="image is 128-128" src="media/Boxing.png" alt="Human boxer silhouette">
+                        <img class="image" src="media/Boxing.png" alt="Human boxer silhouette">
                     </div>
                 </div>
                 <br>
                 <div class="container">
                     <div class="tile is-ancestor">
                         <div class="tile is-parent">
-                            <article class="tile is-child box">
+                            <article class="tile is-child box content">
                                 <p class="title is-spaced">How do I play?</p>
-                                <ol class="content">
-                                    <li>Go to the App page and let it load</li>
-                                    <li>Make sure you allow access to the webcam.</li>
+                                <ol class="subtitle">
+                                    <li>Go to the App page</li>
+                                    <li>Press the Setup Webcam button to set up the webcam</li>
+                                    <li>Figure out the optimal space to stand in, so that your whole upper body is visible</li>
                                     <li>Hit "Play"</li>
                                     <li>Box Away!</li>
                                 </ol>
@@ -47,13 +59,13 @@
                         <div class="tile is-parent">
                             <article class="tile is-child box">
                                 <p class="title is-spaced">What makes the game unique?</p>
-                                <p class="subtitle">Have you ever played a game without a controller? Okay maybe you played on an XBOX Kinect... But it's not really portable, is it? Now you can take your boxing tenencies on the fly!</p>
+                                <p class="subtitle">Have you ever played a game without a controller? Okay maybe you played on an XBOX Kinect... But it's not really portable, is it? Now you can take your boxing tendencies on the fly!</p>
                             </article>
                         </div>
                         <div class="tile is-parent">
                             <article class="tile is-child box">
                                 <p class="title is-spaced">Why should I play it?</p>
-                                <p class="subtitle">Have you ever wanted to do some boxing but didn't want to leave the comfort of your home? Well now you can! This state of the art simulation allows you to practice your puches with virtual enemies</p>
+                                <p class="subtitle">Have you ever wanted to do some boxing but didn't want to leave the comfort of your home? Well now you can! This state of the art simulation allows you to practice your punches with virtual enemies</p>
                             </article>
                         </div>
                     </div>

@@ -39,28 +39,35 @@ const init = (imageData, soundData, canvasElement) => {
     canvas = canvasElement;
     ctx = canvas.getContext('2d');
 
-    sounds['music'].play();
+    if (!sounds['music'].playing()) sounds['music'].play();
 }
 
 const loadLevel = () => {
-    round++;
+    if (round < 15) round++;
 
-    let baseEnemies = utils.createEnemy(images.ufo, Enemy, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+    let baseEnemies, enemies2, enemies3 = [];
+
+    baseEnemies = utils.createEnemy(images.ufo, Enemy, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
         width: canvas.width,
         height: canvas.height
     });
 
-    let enemies2 = utils.createEnemy(images.ufo2, Enemy2, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
-        width: canvas.width,
-        height: canvas.height
-    });
+    if (round > 5) {
+        enemies2 = utils.createEnemy(images.ufo2, Enemy2, round - 5, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+            width: canvas.width,
+            height: canvas.height
+        });
 
-    let enemies3 = utils.createEnemy(images.ufo3, Enemy3, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
-        width: canvas.width,
-        height: canvas.height
-    });
+        if (round > 10)
+            enemies3 = utils.createEnemy(images.ufo3, Enemy3, round - 10, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+                width: canvas.width,
+                height: canvas.height
+            });
+    }
 
     enemies = baseEnemies.concat(enemies2).concat(enemies3);
+    enemies = enemies.filter(enemy => enemy != undefined);
+    console.log(enemies);
 }
 
 const update = (hitpoints) => {
@@ -135,9 +142,13 @@ const getHealth = () => {
     return health;
 }
 
+const getScore = () => {
+    return score;
+}
+
 const reset = () => {
     init(images, sounds, canvas);
     loadLevel();
 }
 
-export { init, loadLevel, update, getHealth, reset, face }
+export { init, loadLevel, update, getHealth, getScore, reset, face }

@@ -3,10 +3,12 @@ import * as main from "./main.js";
 //import web components
 import '../components/my-footer.js';
 import '../components/my-nav.js';
+import '../components/my-banner.js';
+
 import "https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js"
 
 
-const sources = '../data/sources.json'
+const sources = './data/sources.json';
 
 const loadJsonFetch = (url, callback) => {
     let obj = {};
@@ -73,8 +75,13 @@ const loadMedia = (imageSources, soundSources, callback) => {
     console.log("... done loading sounds ...");
 }
 
-loadJsonFetch(sources, (images, sounds) => {
-    loadMedia(images, sounds, () => {
-        main.init(tmPose, images, sounds);
+//only load up data if on app page
+let page = window.location.pathname.split('/');
+page = page[page.length - 1];
+
+if (page == 'app.html')
+    loadJsonFetch(sources, (images, sounds) => {
+        loadMedia(images, sounds, () => {
+            main.init(tmPose, images, sounds);
+        })
     })
-})

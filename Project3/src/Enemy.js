@@ -15,6 +15,7 @@ export default class Enemy extends sprite {
         ctx.save();
 
         //if this causes performance issues switch to symmetric circle sprites
+        //CAUSING COLLISION ISSUES FROM RIGHT
         if (this.fwd.x < 0) { //check to make sure image is pointed in the right dir
             ctx.scale(-1, 1); //flip image
             ctx.drawImage(this.image, -this.x, this.y, this.width, this.height); //account for negative x

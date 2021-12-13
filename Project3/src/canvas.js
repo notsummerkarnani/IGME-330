@@ -161,7 +161,7 @@ const strokeText = (string, x, y, css, colour, lineWidth) => {
 }
 
 const drawHUD = (score, health) => {
-    fillText(`Score: ${score}`, 100, 20, "20pt courier", "black");
-    fillText(`Health: ${health}`, canvasWidth - 110, 20, "20pt courier", "black");
+    fillText(`Score: ${score}`, 100, 20, "20pt Play, sans-serif", "black");
+    fillText(`Health: ${health}`, canvasWidth - 110, 20, "20pt Play, sans-serif", "black");
 }
 export { FACESTATE, setupCanvas, drawPose, reset, fillText, strokeText, drawHUD, drawFace, drawCircle, drawQuad };

@@ -23,6 +23,7 @@ export default class Sprite {
     }
 
     getCircle() {
+        if (this.fwd.x < 0) return new Circle(this.x - this.width / 2, this.y + this.height / 2, this.width / 2)
         return new Circle(this.x + this.width / 2, this.y + this.height / 2, this.width / 2)
     }
 
