@@ -1,13 +1,9 @@
-import sprite from './sprite.js'
+import ImageSprite from './ImageSprite.js';
 
-export default class Enemy extends sprite {
+export default class Enemy extends ImageSprite {
     constructor(x, y, fwd, speed, isDead, width, height, image, type, offscreen) {
-        super(x, y, fwd, speed, isDead);
-        this.width = width;
-        this.height = height;
-        this.image = image;
-        this.type = type;
-        this.offscreen = offscreen;
+        super(x, y, fwd, speed, isDead, width, height, image, type, offscreen);
+
     }
 
     draw(ctx) {
@@ -15,7 +11,6 @@ export default class Enemy extends sprite {
         ctx.save();
 
         //if this causes performance issues switch to symmetric circle sprites
-        //CAUSING COLLISION ISSUES FROM RIGHT
         if (this.fwd.x < 0) { //check to make sure image is pointed in the right dir
             ctx.scale(-1, 1); //flip image
             ctx.drawImage(this.image, -this.x, this.y, this.width, this.height); //account for negative x

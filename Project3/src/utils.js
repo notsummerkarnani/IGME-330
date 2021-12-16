@@ -52,19 +52,19 @@ const getDistance = (a, b) => {
 }
 
 //Creates enemies outside the bounding area of the rect moving towards it
-function createEnemy(image, enemyType, num = 10, speed = 100, width = 50, height = 50, canvas = { width: 900, height: 400 }) {
+function createImageSprite(image, spriteType, num = 10, speed = 100, width = 50, height = 50, canvas = { width: 900, height: 400 }) {
 
     let sprites = [];
     for (let i = 0; i < num; i++) {
         //create objects on the rignt of the canvas
-        let s = new enemyType(Math.random() * canvas.width + canvas.width,
+        let s = new spriteType(Math.random() * canvas.width + canvas.width,
             Math.random() * 0.7 * canvas.height + canvas.height * .15, { x: -Math.random() - .5, y: 0 },
             speed,
             false,
             width,
             height,
             image,
-            enemyType,
+            spriteType,
             true);
 
         //randomly change objects to the left
@@ -92,4 +92,4 @@ const clearBanner = () => {
     warningMessage.innerHTML = null;
 }
 
-export { clearBanner, makeColor, getDistance, getRandomColor, getLinearGradient, getRandomUnitVector, createEnemy, showBanner };
+export { clearBanner, makeColor, getDistance, getRandomColor, getLinearGradient, getRandomUnitVector, createImageSprite, showBanner };

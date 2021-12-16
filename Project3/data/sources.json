@@ -10,6 +10,10 @@
         {
             "name": "ufo3",
             "src": "./media/ufo2.png"
+        },
+        {
+            "name": "heart",
+            "src": "./media/heart.png"
         }
     ],
     "sounds": [{
