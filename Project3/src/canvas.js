@@ -4,7 +4,7 @@
 
 import * as utils from './utils.js';
 
-let ctx, canvasWidth, canvasHeight, gradient;
+let ctx, canvasWidth, canvasHeight, gradient, healthGradient;
 
 const minPartConfidence = .5;
 
@@ -14,13 +14,13 @@ const FACESTATE = Object.freeze({
     DEFAULT: 'DEFAULT'
 })
 
-//Draws a circle at position (x,y) with radius and colour specified
-const drawCircle = (x = 0, y = 0, rad, colour = 'black') => {
+//Draws a circle/arc at position (x,y) depending on angles with radius and colour specified
+const drawCircle = (x = 0, y = 0, startAngle, endAngle, rad, colour = 'black') => {
     if (x <= 0 || y <= 0 || rad <= 0) return;
     ctx.save();
     ctx.fillStyle = colour;
     ctx.beginPath();
-    ctx.arc(x, y, rad, 0, Math.PI * 2, true);
+    ctx.arc(x, y, rad, startAngle, endAngle, false);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
@@ -31,39 +31,43 @@ const drawCircle = (x = 0, y = 0, rad, colour = 'black') => {
 //draw mouth of the player (with a switch statement for mouth) 
 function drawFace(head, eyes, face) {
     //Draw Player head
-    drawCircle(head.x, head.y, head.radius, 'black');
+    drawCircle(head.x, head.y, 0, Math.PI * 2, head.radius, 'black');
 
     //Draw eyes
-    drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius, 'white');
-    drawCircle(eyes['left'].x, eyes['left'].y, eyes['left'].radius * .25, 'black');
+    drawCircle(eyes['left'].x, eyes['left'].y, 0, Math.PI * 2, eyes['left'].radius, 'white');
+    drawCircle(eyes['left'].x, eyes['left'].y, 0, Math.PI * 2, eyes['left'].radius * .25, 'black');
 
-    drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius, 'white');
-    drawCircle(eyes['right'].x, eyes['right'].y, eyes['right'].radius * .25, 'black');
+    drawCircle(eyes['right'].x, eyes['right'].y, 0, Math.PI * 2, eyes['right'].radius, 'white');
+    drawCircle(eyes['right'].x, eyes['right'].y, 0, Math.PI * 2, eyes['right'].radius * .25, 'black');
 
     switch (face) {
         case FACESTATE.SMILE:
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(head.x, head.y + head.radius * .25, head.radius * .5, 0, Math.PI, false);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
+            // ctx.save();
+            // ctx.beginPath();
+            // ctx.arc(head.x, head.y + head.radius * .25, head.radius * .5, 0, Math.PI, false);
+            // ctx.closePath();
+            // ctx.fill();
+            // ctx.restore();
+            drawCircle(head.x, head.y + head.radius * .25, 0, Math.PI, head.radius * .5, 'red');
             break;
         case FACESTATE.FROWN:
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(head.x, head.y + head.radius * .4, head.radius * .5, Math.PI, Math.PI * 2, false);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
+            // ctx.save();
+            // ctx.beginPath();
+            // ctx.arc(head.x, head.y + head.radius * .4, head.radius * .5, Math.PI, Math.PI * 2, false);
+            // ctx.closePath();
+            // ctx.fill();
+            // ctx.restore();
+            drawCircle(head.x, head.y + head.radius * .4, Math.PI, Math.PI * 2, head.radius * .5, 'red');
             break;
         case FACESTATE.DEFAULT:
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(head.x, head.y + head.radius * .25, head.radius * .25, 0, Math.PI * 2, false);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
+            // ctx.save();
+            // ctx.beginPath();
+            // ctx.arc(head.x, head.y + head.radius * .25, head.radius * .25, 0, Math.PI * 2, false);
+            // ctx.closePath();
+            // ctx.fill();
+            // ctx.restore();
+
+            drawCircle(head.x, head.y + head.radius * .25, 0, Math.PI * 2, head.radius * .25, 'red');
             break;
     }
 
@@ -135,6 +139,12 @@ function setupCanvas(canvasElement) {
             { percent: 1, color: "#FFA8A8" }
         ]);
 
+    healthGradient = utils.getLinearGradient(ctx, canvasWidth - 110, 10, canvasWidth,
+        10, [{ percent: 0, color: "red" },
+            { percent: .5, color: "yellow" },
+            { percent: 1, color: "green" }
+        ]);
+
     ctx.save();
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -161,7 +171,18 @@ const strokeText = (string, x, y, css, colour, lineWidth) => {
 }
 
 const drawHUD = (score, health) => {
-    fillText(`Score: ${score}`, 100, 20, "20pt Play, sans-serif", "black");
-    fillText(`Health: ${health}`, canvasWidth - 110, 20, "20pt Play, sans-serif", "black");
+    fillText(`Score: ${score}`, 100, 22, "20pt Play, sans-serif", "black");
+
+    //draw health bar
+    //make sure it aligns with score
+    ctx.save();
+    ctx.strokeRect(canvasWidth - 110, 10, 100, 24);
+    ctx.stroke();
+    ctx.fillStyle = healthGradient;
+    ctx.fillRect(canvasWidth - 110, 10, health, 24);
+    ctx.fill();
+    ctx.restore();
+
+    fillText(`Health     ${health}`, canvasWidth - 120, 22, "20pt Play, sans-serif", "black");
 }
 export { FACESTATE, setupCanvas, drawPose, reset, fillText, strokeText, drawHUD, drawFace, drawCircle, drawQuad };

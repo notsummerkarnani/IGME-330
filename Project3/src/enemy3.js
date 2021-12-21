@@ -16,5 +16,7 @@ export default class Enemy3 extends Enemy {
 
         this.x += (this.fwd.x / magnitude) * this.speed * dt;
         this.y += (this.fwd.y / magnitude) * this.speed * dt;
+
+        if (this.fwd == { x: 0, y: 0 }) this.isDead = true;
     }
 }

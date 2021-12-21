@@ -46,28 +46,30 @@ const init = (imageData, soundData, canvasElement) => {
 }
 
 const loadLevel = () => {
-    if (round < 15) round++;
+    if (round < 10) round++;
 
     let baseEnemies, enemies2, enemies3;
 
-    pickups = utils.createImageSprite(images.heart, Heart, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.width, {
-        width: canvas.width,
-        height: canvas.height
-    });
+    if (health < 30) {
+        pickups = utils.createImageSprite(images.heart, Heart, 2, enemySpeed, DIMENSIONS.height, DIMENSIONS.height, {
+            width: canvas.width,
+            height: canvas.height
+        });
+    }
 
     baseEnemies = utils.createImageSprite(images.ufo, Enemy, round, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
         width: canvas.width,
         height: canvas.height
     });
 
-    if (round > 5) {
-        enemies2 = utils.createImageSprite(images.ufo2, Enemy2, round - 5, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+    if (round > 4) {
+        enemies2 = utils.createImageSprite(images.ufo2, Enemy2, round - 4, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
             width: canvas.width,
             height: canvas.height
         });
 
-        if (round > 10)
-            enemies3 = utils.createImageSprite(images.ufo3, Enemy3, round - 10, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
+        if (round > 7)
+            enemies3 = utils.createImageSprite(images.ufo3, Enemy3, round - 7, enemySpeed, DIMENSIONS.width, DIMENSIONS.height, {
                 width: canvas.width,
                 height: canvas.height
             });
@@ -75,8 +77,6 @@ const loadLevel = () => {
 
     enemies = baseEnemies.concat(enemies2).concat(enemies3);
     enemies = enemies.filter(enemy => enemy != undefined);
-    //console.log(enemies);
-    //console.log(pickups);
 }
 
 const update = (hitpoints) => {
@@ -121,7 +121,6 @@ const update = (hitpoints) => {
                         if (!gradingMode) health -= 10;
                         face = FACESTATE.FROWN;
                         s.offscreen = true;
-
                     }
                 }
             }
