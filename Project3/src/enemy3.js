@@ -8,7 +8,7 @@ export default class Enemy3 extends Enemy {
 
     //heatseeking  
     move(dt = 1 / 60, head) {
-        if (!head) return;
+        if (!head || this.isDead) return;
         this.fwd.x = head.x - this.x;
         this.fwd.y = head.y - this.y;
 
